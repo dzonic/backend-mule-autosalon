@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:cors="http://www.mulesoft.org/schema/mule/cors"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <apikit:config name="autosalonapi-config" api="autosalonapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="autosalonapi-main">
+        <http:listener config-ref="HTTP_Listener_config" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="autosalonapi-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="autosalonapi-console">
+        <http:listener config-ref="HTTP_Listener_config" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="autosalonapi-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/cors http://www.mulesoft.org/schema/mule/cors/current/mule-cors.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="put:\automobil\(automobilID):application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="b3d8750a-e37c-4313-806e-8777fb302697" name="putAutomobil" />
+    </flow>
+    <flow name="put:\dodatniZahtev\(dodatniZahtevID):application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="c206893b-d622-425b-80be-20d796e38b1d" name="putDodatniZahtev" />
+    </flow>
+    <flow name="put:\korisnik\(korisnikID):application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="d5ef4601-2b93-45ec-9ba6-a14ee3b08e89" name="putKorisnik" />
+    </flow>
+    <flow name="put:\kupac\(kupacID):application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="4edaf467-42bf-4604-89f2-a8fce8056117" name="putKupac" />
+    </flow>
+    <flow name="put:\kupoprodajniUgovor\(kupoprodajniUgovorID):application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="d5582e57-d0b5-49be-b830-62f1d9a4c03d" name="putKupoprodajniUgovor" />
+    </flow>
+    <flow name="put:\marka\(markaID):application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="4474bc40-4a22-406a-81c0-95f7c15081ff" name="putMarka" />
+    </flow>
+    <flow name="put:\model\(modelID):application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="86597f53-6d58-404d-9c35-030ab0062530" name="putModel" />
+    </flow>
+    <flow name="put:\osiguravajucaKuca\(osiguravajucaKucaID):application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="46d45f0c-8127-42ff-aed6-e3af02d54dc9" name="putOsiguravajucaKuca" />
+    </flow>
+    <flow name="put:\poliseOsiguranjaKupoprodajniUgovor\(poliseOsiguranjaID)\(kupoprodajniUgovorID):application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="03c473fb-d100-4d6d-9f7f-87d454076315" name="putPoliseIUgovori" />
+    </flow>
+    <flow name="put:\poliseOsiguranja\(poliseOsiguranjaID):application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="0cc00caf-d2a5-4261-abc1-4deb227e7d60" name="putPoliseOsiguranja" />
+    </flow>
+    <flow name="put:\prodavac\(prodavacID):application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="180d7de3-50ce-4394-8552-e0bc914f91cc" name="putProdavac" />
+    </flow>
+    <flow name="put:\servis\(servisID):application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="79e27b60-4897-4455-bd03-db85568594ea" name="putServis" />
+    </flow>
+    <flow name="put:\tipAutomobila\(tipAutomobilaID):application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="46a9cdc3-fc1c-4f62-8f19-39dc25adf6e9" name="putTipAutomobila" />
+    </flow>
+    <flow name="delete:\automobil\(automobilID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="6087b3aa-ba85-4978-be94-040fbed1138f" name="deleteAutomobil" />
+    </flow>
+    <flow name="delete:\dodatniZahtev\(dodatniZahtevID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="46b1bb79-f362-46b5-960b-9cdf544b8e83" name="deleteDodatniZahtev" />
+    </flow>
+    <flow name="delete:\korisnik\(korisnikID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="818d8236-2dc2-407c-a0b3-bafeb389e335" name="deleteKorisnik" />
+    </flow>
+    <flow name="delete:\kupac\(kupacID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="20a631a3-fdd6-46c5-8fba-ba27a47a0177" name="deleteKupac" />
+    </flow>
+    <flow name="delete:\kupoprodajniUgovor\(kupoprodajniUgovorID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="89588c20-868e-47f1-99b3-caa66c81e8a1" name="deleteKupoprodajniUgovor" />
+    </flow>
+    <flow name="delete:\marka\(markaID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="dfdc737f-b9f7-4ca1-bfa1-31494721a971" name="deleteMarka" />
+    </flow>
+    <flow name="delete:\model\(modelID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="4f549c8b-753d-4c65-940d-4c59d6210c4f" name="deleteModel" />
+    </flow>
+    <flow name="delete:\osiguravajucaKuca\(osiguravajucaKucaID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="f79ba223-f69d-42f0-b528-cf75112c906a" name="deleteOsiguravajucaKuca" />
+    </flow>
+    <flow name="delete:\poliseOsiguranja\(poliseOsiguranjaID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="aaa8c124-1005-46d9-8b77-6e947cfede98" name="deletePoliseOsiguranja" />
+    </flow>
+    <flow name="delete:\poliseOsiguranjaKupoprodajniUgovor\(poliseOsiguranjaID)\(kupoprodajniUgovorID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="c22ba49f-5920-4cd8-a395-ca9b0b447fda" name="deletePoliseOsiguranjaiKupoprodajnogUgovora" />
+    </flow>
+    <flow name="delete:\prodavac\(prodavacID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="cd2caf4d-78c7-4b0a-9289-40f3daaeb6b3" name="deleteProdavac" />
+    </flow>
+    <flow name="delete:\servis\(servisID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="dc810ea5-192f-4198-98d7-9fd2db487d8e" name="deleteServis" />
+    </flow>
+    <flow name="delete:\tipAutomobila\(tipAutomobilaID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="a34fdb29-cf27-486a-bb41-08fb39422f85" name="deleteTipAutomobila" />
+    </flow>
+    <flow name="get:\automobil:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="93de7215-5f73-4725-8923-38ec630b059b" name="getAllAutomobil" />
+    </flow>
+    <flow name="get:\dodatniZahtev:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="a597318d-c976-45c3-b3fe-f045e1adf71a" name="getAllDodatniZahtev" />
+    </flow>
+    <flow name="get:\korisnik:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="44177a39-e393-4bbc-9956-7efbbfe25482" name="getAllKorisnik" />
+    </flow>
+    <flow name="get:\kupac:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="40a7876e-b1c2-48c4-bca7-74d31d3e00dc" name="getAllKupac" />
+    </flow>
+    <flow name="get:\kupoprodajniUgovor:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="2a60b8c1-3ed5-496d-80b7-0149ed9ec68b" name="getAllKupoprodajniUgovor" />
+    </flow>
+    <flow name="get:\marka:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="fe95e777-1014-497f-b547-b469c60e8d22" name="getAllMarka" />
+    </flow>
+    <flow name="get:\model:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="cb30338b-d49e-44cb-b017-3c8c9b3f0a58" name="getAllModel" />
+    </flow>
+    <flow name="get:\osiguravajucaKuca:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="1fb5e801-751f-4464-b9d3-0e52df6d052b" name="getAllOsiguravajucaKuca" />
+    </flow>
+    <flow name="get:\poliseOsiguranja:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="1da9e2d9-1faf-442a-a13a-b830f1b5da5e" name="getAllPoliseOsiguranja" />
+    </flow>
+    <flow name="get:\poliseOsiguranjaKupoprodajniUgovor:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="0b20e933-6832-456c-b625-be533d1e3ab5" name="getAllPoliseiUgovor" />
+    </flow>
+    <flow name="get:\prodavac:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="7326f472-72b7-4659-88e6-c0ee026e5883" name="getAllProdavac" />
+    </flow>
+    <flow name="get:\servis:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="1b77cfab-0416-41d5-af29-b7b7bd4f50a2" name="getAllServis" />
+    </flow>
+    <flow name="get:\tipAutomobila:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="7aa2b096-9b14-4f40-a52c-1eb6cdfea1ce" name="getAllTipAutomobila" />
+    </flow>
+    <flow name="get:\automobil\(automobilID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="b1ad7d30-e7f2-4bf1-a793-a73b055e1929" name="getAutomobilByID" />
+    </flow>
+    <flow name="get:\dodatniZahtev\(dodatniZahtevID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="bacabadc-979f-4744-8978-b87de0978d4e" name="getDodatniZahtevByID" />
+    </flow>
+    <flow name="get:\korisnik\(korisnikID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="eee5bfde-baf5-4f7a-ae04-0e668e5d0dbc" name="getKorisniciByID" />
+    </flow>
+    <flow name="get:\kupac\(kupacID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="dd3a4fc6-b7e8-44ef-8d19-f671c7ba8e0c" name="getKupacByID" />
+    </flow>
+    <flow name="get:\kupoprodajniUgovor\(kupoprodajniUgovorID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="d6ce3ff5-c9d9-498d-9621-ac863e354ad7" name="getKupoprodajniUgovorByID" />
+    </flow>
+    <flow name="get:\marka\(markaID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="56b4dd8b-524c-43b9-a574-cce41a75972b" name="getMarkaByID" />
+    </flow>
+    <flow name="get:\model\(modelID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="2cd6e7e0-4097-4dbd-beb4-5546b02b4ab9" name="getModelByID" />
+    </flow>
+    <flow name="get:\osiguravajucaKuca\(osiguravajucaKucaID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="549f59d3-c4b1-405d-a81d-62ef2dd379fe" name="getOsiguravajucaKucaByID" />
+    </flow>
+    <flow name="get:\poliseOsiguranja\(poliseOsiguranjaID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="a0f0f40d-fda7-449d-90a2-7227e7092c6a" name="getPoliseOsiguranjaByID" />
+    </flow>
+    <flow name="get:\poliseOsiguranjaKupoprodajniUgovor\(poliseOsiguranjaID)\(kupoprodajniUgovorID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="a1b58ab9-ec9c-44fd-add9-da95ccbc2d9d" name="getPoliseiUgovoriByID" />
+    </flow>
+    <flow name="get:\prodavac\(prodavacID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="220f4266-f24f-4d95-856a-6cd6502495d6" name="getProdavacByID" />
+    </flow>
+    <flow name="get:\servis\(servisID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="ec3f67dc-5554-4cae-af6e-9a0a4c04fa51" name="getServisByID" />
+    </flow>
+    <flow name="get:\tipAutomobila\(tipAutomobilaID):autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="8d59ba81-7288-454f-911a-28b0197bf00c" name="getTipoviAutomobilaByID" />
+    </flow>
+    <flow name="post:\automobil:application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="88ee389b-95be-4594-9fb0-9c3e7ee3ec00" name="postAutomobil" />
+    </flow>
+    <flow name="post:\dodatniZahtev:application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="e1c08985-b2f2-4ecd-baa3-8132514e0616" name="postDodatniZahtev" />
+    </flow>
+    <flow name="post:\korisnik:application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="289c1345-4302-447e-8ec5-088f16f0fcef" name="postKorisnik" />
+    </flow>
+    <flow name="post:\kupac:application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="27748e42-6f14-4c76-b62b-4e966531d5e4" name="postKupac" />
+    </flow>
+    <flow name="post:\kupoprodajniUgovor:application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="617ceed1-34fb-4464-8bc9-0a8b4b25a809" name="postKupoprodajniUgovor" />
+    </flow>
+    <flow name="post:\marka:application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="797c7a59-6739-441d-a997-01fba104ee4d" name="postMarka" />
+    </flow>
+    <flow name="post:\model:application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="873a3a90-ce49-407f-8ce5-56be9c6afbd1" name="postModel" />
+    </flow>
+    <flow name="post:\osiguravajucaKuca:application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="91ed4aef-a6b6-44b6-8afd-d2bcffcc1636" name="postOsiguravajucaKuca" />
+    </flow>
+    <flow name="post:\poliseOsiguranja:application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="20dc75a3-6aac-4b3b-8898-c357a2b2834a" name="postPoliseOsiguranja" />
+    </flow>
+    <flow name="post:\poliseOsiguranjaKupoprodajniUgovor:application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="47665d27-8098-4455-9d35-42c5acbb867f" name="postPoliseiUgovora" />
+    </flow>
+    <flow name="post:\prodavac:application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="8ff48d8a-803a-4c45-bd40-b8e125734bf6" name="postProdavac" />
+    </flow>
+    <flow name="post:\servis:application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="e095e786-7389-4f4c-8983-21368602b162" name="postServis" />
+    </flow>
+    <flow name="post:\tipAutomobila:application\json:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="aa00fc9e-4c06-40c7-af94-81c70d6db9c4" name="postTipAutomobila" />
+    </flow>
+    <flow name="get:\login:autosalonapi-config">
+        <flow-ref doc:name="Flow Reference" doc:id="fa137a7e-3626-4417-978c-90bbeaf35734" name="loginKorisnik" />
+    </flow>
+</mule>

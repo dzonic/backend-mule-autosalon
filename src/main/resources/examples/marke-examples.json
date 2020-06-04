@@ -1,0 +1,12 @@
+[
+	{
+		"markaID": 1,
+		"nazivMarke": "BMW",
+		"modelID": 1
+	},
+	{
+		"markaID": 2,
+		"nazivMarke": "BMW",
+		"modelID": 3
+	}
+]

@@ -1,0 +1,16 @@
+[
+	{
+		"servisID": 1,
+		"datumServisiranja": "2019-03-12T00:00:00.000Z",
+		"opis": "Postavljanje i zamena sezonskih guma",
+		"cenaServisa": 5000,
+		"aktuelan": false
+	},
+	{
+		"servisID": 2,
+		"datumServisiranja": "2020-01-23T00:00:00.000Z",
+		"opis": "Testiranje rada kontrolne table",
+		"cenaServisa": 6500,
+		"aktuelan": false
+	}
+]

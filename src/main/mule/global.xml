@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:cors="http://www.mulesoft.org/schema/mule/cors"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/cors http://www.mulesoft.org/schema/mule/cors/current/mule-cors.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="67b647c7-a812-4ffc-a6ef-830d2de20ed3">
+		<http:listener-connection host="0.0.0.0" port="${http.port}" />
+		<http:listener-interceptors >
+			<http:cors-interceptor >
+				<http:origins >
+					<http:public-resource />
+				</http:origins>
+			</http:cors-interceptor>
+		</http:listener-interceptors>
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="0f0d212b-4478-475b-8977-dbd580f408f3" file="config.yaml" />
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="723ecf66-82fa-460a-a8ce-608bbe59115d" >
+		<db:my-sql-connection host="${database.host}" port="${database.port}" user="${database.user}" password="${database.password}" database="${database.database}" />
+	</db:config>
+	<configuration doc:name="Configuration" doc:id="137324b5-626a-4c68-95a3-af8dd080b720" defaultErrorHandler-ref="globalError_Handler" />
+	<file:config name="File_Config" doc:name="File Config" doc:id="4d97ccfa-b420-4b8c-8ce1-62bd698efa46" >
+		<file:connection workingDir="C:\Users\Admin\AnypointStudio\studio-workspace\autosalon"/>
+	</file:config>
+	<error-handler name="globalError_Handler" doc:id="b15aebc2-68c7-4feb-a650-f7aa22e5279f" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="46d219d2-5232-4e16-9163-596393e5ee28" type="APP:INVALID_ID">
+			<ee:transform doc:name="Transform Message" doc:id="62fd3cab-16c4-4200-b581-32862634744a" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": error.description
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="#[404]" doc:name="Set Variable" doc:id="d7170a81-b4bd-45d2-803a-0921fe68f7ff" variableName="httpStatus"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="14259782-f7cb-454f-a31f-6f899af0eba6" type="APP:INVALID_USERNAME_AND_PASS">
+			<ee:transform doc:name="Transform Message" doc:id="ac1bea6d-1699-4a4c-abc5-98cdfcf13af3">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"status": "error",
+    "code": 401,
+    "message": "Pogresan username/password. Pokusajte opet!"
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="401" doc:name="Set Variable" doc:id="ba94b895-da9d-4181-9549-a6084f199957" variableName="httpStatus" />
+		</on-error-propagate>
+	</error-handler>
+</mule>

@@ -1,0 +1,12 @@
+http:
+ port: "8081"
+ 
+database:
+ host: "localhost"
+ port: "3306"
+ user: "root"
+ password: "Nikola#1997"
+ database: "erp_autosalon"
+ 
+file:
+ pathW: C:\Users\Admin\AnypointStudio\studio-workspace\autosalon\src\main\resources\upis\

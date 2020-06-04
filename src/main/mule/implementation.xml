@@ -1,0 +1,1466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="getAutorizacija" doc:id="89afd3b1-d156-4bc7-8913-750ffb57a998" >
+		<set-variable value="#[message.attributes.headers.KlijentID]" doc:name="username" doc:id="8b85dc10-4a62-465c-8baa-2514f078553c" variableName="username"/>
+		<set-variable value="#[message.attributes.headers.KlijentLozinka]" doc:name="Password" doc:id="aba1ae07-f080-437a-b546-2b156aa84b2d" variableName="password"/>
+	</flow>
+	<flow name="loginKorisnik" doc:id="d97848c3-0873-4afc-999c-a333dd5c118a" >
+		<flow-ref doc:name="Flow Reference" doc:id="2cf0cbbf-e1c1-4525-a28c-691ee14a2c4b" name="getAutorizacija"/>
+		<db:select doc:name="Select" doc:id="03ac93ae-9e0e-4c7d-bff9-1d111ef59ba1" config-ref="Database_Config">
+			<db:sql >SELECT * FROM korisnik 
+WHERE email = :username and password = :password</db:sql>
+			<db:input-parameters ><![CDATA[#[{'username' : vars.username, 
+'password' : vars.password}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-true doc:name="Is true" doc:id="76c9615e-ab3a-4961-b80e-347b3d97b535" expression='#[sizeOf(payload)&gt;0 ]'>
+			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:INVALID_USERNAME_AND_PASS" />
+		</validation:is-true>
+		<ee:transform doc:name="Transform Message" doc:id="13b604b6-cd72-4b94-a2ad-10a49502871c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"status": "success",
+	"code": 200,
+	"data": {
+		Username: vars.username,
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteOsiguravajucaKuca" doc:id="957d4910-f0b8-47da-9a90-3dd24da561ec" >
+		<flow-ref doc:name="Flow Reference" doc:id="29995029-51cc-47ec-a1c2-81390f61c2e0" name="osiguravajucaKucaFroPut"/>
+		<flow-ref doc:name="Flow Reference" doc:id="5e8d46bd-d13b-47eb-9e8e-f13b3752561e" name="getOsiguravajucaKucaByID"/>
+		<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="0c957157-35da-4eec-a07e-25c937b4a6cf" />
+		<db:delete doc:name="Delete" doc:id="04062d68-5ce4-4d7d-bd20-b8fec6c2f55e" config-ref="Database_Config">
+			<db:sql >DELETE  FROM osiguravajuca_kuca 
+WHERE osiguravajucaKucaID = :kuca</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kuca' : vars.osiguravajucaKucaID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="7f641893-8afb-4845-ac27-63648f11a9d7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Osiguravajuca kuca je uspesno obrisana"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deletePoliseOsiguranja" doc:id="73a0337a-3a27-4a4b-b262-eed826cd0fdb" >
+		<flow-ref doc:name="Flow Reference" doc:id="233acfcf-2a23-423a-8464-672baf31c258" name="poliseOsiguranjaForPut"/>
+		<flow-ref doc:name="Flow Reference" doc:id="d2e300f7-14d0-4852-bf65-b9b7dfeb1b76" name="getPoliseOsiguranjaByID"/>
+		<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="435f33c0-79be-42d0-bc85-3df1b41521b1" />
+		<db:delete doc:name="Delete" doc:id="7b41dba2-d18b-4fd5-8d4e-be781101d836" config-ref="Database_Config">
+			<db:sql >DELETE FROM polise_osiguranja
+WHERE poliseOsiguranjaID = :pol</db:sql>
+			<db:input-parameters ><![CDATA[#[{'pol' : vars.poliseOsiguranjaID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="45469bca-b9ac-40f0-8f10-7cf038efd1d4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Polisa osiguranja uspesno obrisana"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteProdavac" doc:id="2fad384d-3577-489d-b864-5df274dc577f" >
+		<flow-ref doc:name="Flow Reference" doc:id="cc48d3b9-012f-4871-8d83-119732bf30fb" name="prodavacForPut" />
+		<flow-ref doc:name="Flow Reference" doc:id="0e66126c-a89b-4e48-b646-1e7bfd74ab1b" name="getProdavacByID" />
+		<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="92c5875e-9933-42f7-8464-47eda6568b36" />
+		<db:delete doc:name="Delete" doc:id="f31da644-e8f2-4a91-9851-7515e5fb65fb" config-ref="Database_Config" >
+			<db:sql >DELETE  FROM prodavac
+WHERE prodavacID = :pro</db:sql>
+			<db:input-parameters ><![CDATA[#[{'pro' : vars.prodavacID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="ff0671bd-dd37-495a-8794-4251199beba9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Prodavac je uspesno obrisan"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteTipAutomobila" doc:id="7119e974-188d-44c0-afd4-db78a2be2841" >
+		<flow-ref doc:name="Flow Reference" doc:id="072c6acf-866d-4ffe-9336-b8d326c5f3c0" name="tipAutomobilaForPut" />
+		<flow-ref doc:name="Flow Reference" doc:id="7a6100be-5988-47ec-b21a-7c37672db0f0" name="getTipoviAutomobilaByID" />
+		<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="c9a8d877-b9e2-4a5d-824c-69282a984157" />
+		<db:delete doc:name="Delete" doc:id="c9b1f958-69f1-4efc-ba35-efeed0087c7a" config-ref="Database_Config" >
+			<db:sql >DELETE FROM tip_automobila
+WHERE tipAutomobilaID = :tip</db:sql>
+			<db:input-parameters ><![CDATA[#[{'tip' : vars.tipAutomobilaID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="92f00958-c925-4a6f-b11f-b55fb2ec1aeb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Tip automobila uspesno obrisan"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteServis" doc:id="614efd52-1f0f-47c8-9e5d-72dc7151cf21" >
+		<flow-ref doc:name="Flow Reference" doc:id="7b1de4ee-2d9e-40b2-bd6f-be6961e3bf31" name="servisForPut"/>
+		<flow-ref doc:name="Flow Reference" doc:id="3d6af818-ba74-463e-9cf6-0a94cdc783ae" name="getServisByID"/>
+		<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="8a4336d2-673d-4879-9397-0502d6dae5f3" />
+		<db:delete doc:name="Delete" doc:id="11250cc5-1724-4e9f-b994-75dba1c3f08e" config-ref="Database_Config">
+			<db:sql >DELETE FROM servis_automobila
+WHERE servisID = :ser</db:sql>
+			<db:input-parameters ><![CDATA[#[{'ser' : vars.servisID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="fc5be983-f2f2-46dd-adb2-357af0e25ff8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Servis je uspesno obrisan"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteKupac" doc:id="cee5efbb-e4e5-4726-8cc7-d847f88f21e1" >
+		<flow-ref doc:name="Flow Reference" doc:id="ae2cbe63-de9f-4cbe-85b1-94154cfea270" name="kupacForPut" />
+		<flow-ref doc:name="Flow Reference" doc:id="8b8c1d23-8e99-43ce-a25b-6fef68df63fd" name="getKupacByID" />
+		<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="8eedb13a-72d2-48c9-b188-d271da594330" />
+		<db:delete doc:name="Delete" doc:id="9bbb5913-bb37-4354-8809-75fcbffedcda" config-ref="Database_Config" >
+			<db:sql >DELETE FROM kupac
+WHERE kupacID = :kup</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kup' : vars.kupacID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="13eb830e-be7e-4c24-a657-17853a4606eb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Kupac je uspesno obrisan"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteKupoprodajniUgovor" doc:id="9efa32ed-2a77-432e-89fa-d0333793e4ca" >
+		<flow-ref doc:name="Flow Reference" doc:id="d8410d3a-4df1-4e60-adcf-439dd2b38b31" name="kupoprodajniUgovorforPut" />
+		<flow-ref doc:name="Flow Reference" doc:id="2f333c1c-0b1a-402d-9764-1252c6d3a098" name="getKupoprodajniUgovorByID" />
+		<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="acd6e4b2-7003-404e-b1d7-0d61a915481b" />
+		<db:delete doc:name="Delete" doc:id="3c99292d-fb42-49c2-bd67-514c1c31e18c" config-ref="Database_Config" >
+			<db:sql >DELETE FROM kupoprodajni_ugovor
+WHERE kupoprodajniUgovorID = :kup</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kup' : vars.kupoprodajniUgovorID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="95caae28-2718-45d0-a958-55d67ebc5ddf" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Kupoprodajni ugovor je uspesno obrisan"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteAutomobil" doc:id="ee8da482-e913-4260-9c90-7de790105dfd" >
+		<flow-ref doc:name="Flow Reference" doc:id="f61c7f8e-7cca-458b-91ce-f1425d3940a1" name="automobilForPut" />
+		<flow-ref doc:name="Flow Reference" doc:id="ae39fc7c-55b8-4c4a-98c1-089dee785521" name="getAutomobilByID" />
+		<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="39a9797a-5d1d-49e3-8736-06b911cd04dd" />
+		<db:delete doc:name="Delete" doc:id="cdfd4f27-472a-4b35-82b9-df71be6d00c1" config-ref="Database_Config" >
+			<db:sql >DELETE FROM automobil
+WHERE automobilID = :aut</db:sql>
+			<db:input-parameters ><![CDATA[#[{'aut' : vars.automobilID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="0f4cab8e-1d1b-42a0-9cbd-ccd779e7f957" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Automobil je uspesno obrisan"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteKorisnik" doc:id="675b6923-1317-45ef-9d63-16a279386ef8" >
+		<flow-ref doc:name="Flow Reference" doc:id="64227cca-e4c9-4e0a-ba72-5a79c1a049bb" name="korisnikForPut" />
+		<flow-ref doc:name="Flow Reference" doc:id="e7521f55-2168-4ba8-b895-cddf82af010f" name="getKorisniciByID" />
+		<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="5f2ab06a-2041-4238-8073-39d18ad15c5f" />
+		<db:delete doc:name="Delete" doc:id="f1148fde-836a-4436-bb14-5743104f08d9" config-ref="Database_Config" >
+			<db:sql >DELETE FROM korisnik
+WHERE korisnikID = :kor</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kor' : vars.korisnikID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="9ceff847-abdf-4384-bbed-2b39c6e5553c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Korisnik je uspesno obrisan"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteDodatniZahtev" doc:id="ec03078f-d110-4e80-a17e-9cf9505c16ea" >
+		<flow-ref doc:name="Flow Reference" doc:id="a68566c0-8ca5-4191-9980-824639a7ab55" name="dodatnizahtevForPut"/>
+		<flow-ref doc:name="Flow Reference" doc:id="32fe63c0-8810-4114-93ce-da0ecae4421f" name="getDodatniZahtevByID"/>
+		<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="f54f4467-6162-4e99-b497-c48925d1de35" />
+		<db:delete doc:name="Delete" doc:id="795d6daf-5560-41ad-b35f-e1f59a630e19" config-ref="Database_Config">
+			<db:sql >DELETE FROM dodatnizahtev
+WHERE dodatniZahtevID = :zah</db:sql>
+			<db:input-parameters ><![CDATA[#[{'zah' : vars.dodatniZahtevID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="1941e038-c4c1-4920-a3f7-87ccd5aae988" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Dodatni zahtev je uspesno obrisan"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteMarka" doc:id="25c59f66-e618-475c-a199-f88e1dcb368d" >
+		<flow-ref doc:name="Flow Reference" doc:id="32085ae6-863f-4f8b-94f1-939b2744c2f9" name="markaForPut" />
+		<flow-ref doc:name="Flow Reference" doc:id="30348872-f741-40e4-9fdd-52aba2b92240" name="getMarkaByID" />
+		<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="af58d36b-2a9a-457c-82be-7f087fc2aff0" />
+		<db:delete doc:name="Delete" doc:id="fa907c7f-deb6-4fa4-bb13-5eba8061c9da" config-ref="Database_Config" >
+			<db:sql >DELETE FROM marka
+WHERE markaID = :marka</db:sql>
+			<db:input-parameters ><![CDATA[#[{'marka' : vars.markaID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="1ef365ab-af8e-41b7-97a4-f335b20503dc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Marka je uspesno obrisana"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deletePoliseOsiguranjaiKupoprodajnogUgovora" doc:id="b459525f-047e-4f89-ab8b-3889db22330b" >
+		<flow-ref doc:name="Flow Reference" doc:id="fc5e520b-a621-4cd4-906b-f172a5155406" name="poliseiUgovoriFroPut"/>
+		<flow-ref doc:name="Flow Reference" doc:id="20fd4399-b627-4071-8841-3c45775c3580" name="getPoliseiUgovoriByID"/>
+		<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="db9c5d46-56ac-494b-908b-3cd96a62b9bc" />
+		<db:delete doc:name="Delete" doc:id="b7a99ce7-a615-4d4e-b7f8-941d85d30e3f" config-ref="Database_Config">
+			<db:sql >DELETE FROM polise_osiguranja_kupoprodajni_ugovor
+WHERE kupoprodajniUgovorID = :kup AND
+poliseOsiguranjaID = :pol</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kup' : vars.kupoprodajniUgovorID, 'pol' : vars.poliseOsiguranjaID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="c10c5cd5-1b70-406c-81d5-d2180bc68816" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Polise i ugovori su uspeno obrisani"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteModel" doc:id="27fb2710-858f-4c7d-8f92-e5ca1a55866e" >
+		<flow-ref doc:name="Flow Reference" doc:id="9249737e-9d42-4fc9-9440-462c1f93ab59" name="modelForPut"/>
+		<flow-ref doc:name="Flow Reference" doc:id="21369392-a8dc-46e6-80e9-7ed502a8c8a3" name="getModelByID"/>
+		<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="b239eb3b-b2af-4300-bab3-57bfc71ff923" />
+		<db:delete doc:name="Delete" doc:id="3e32e29b-f6a8-48de-83b3-ce113bcd1397" config-ref="Database_Config">
+			<db:sql >DELETE FROM model
+WHERE modelID = :model</db:sql>
+			<db:input-parameters ><![CDATA[#[{'model' : vars.modelID}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="b3aa85c5-ed94-4229-9426-46c40f13284e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Model je uspesno obrisan"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="poliseiUgovoriFroPut" doc:id="2be30751-21b9-4bcd-bdc8-bb62c441d420" >
+		<set-variable value="#[message.payload]" doc:name="Body" doc:id="a944494a-3efe-4c56-ad6f-ed474d2c7f4e" variableName="body" />
+		<set-variable value="#[message.attributes.uriParams.kupoprodajniUgovorID]" doc:name="Ugovor" doc:id="b7abeb62-147a-432b-b601-f0568ebcc48d" variableName="kupoprodajniUgovorID" />
+		<set-variable value="#[message.attributes.uriParams.poliseOsiguranjaID]" doc:name="Polise" doc:id="fea93137-7e79-4c2e-8b08-fb07b8bb23a2" variableName="poliseOsiguranjaID"/>
+	</flow>
+	<flow name="updatePoliseIUgovori" doc:id="c5d1973b-5328-4e82-87e0-fbe95e80929e" >
+		<db:update doc:name="Update" doc:id="3c0dc33c-ef7f-4460-a9b1-29f73101e3af" config-ref="Database_Config">
+			<db:sql >UPDATE polise_osiguranja_kupoprodajni_ugovor
+SET brojPoliseUgovora= :bp
+WHERE kupoprodajniUgovorID = :kupoprodajniUgovorID
+AND poliseOsiguranjaID = :poliseOsiguranjaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'bp' : payload.brojPoliseUgovora, 'kupoprodajniUgovorID' : vars.kupoprodajniUgovorID
+, 'poliseOsiguranjaID' : vars.poliseOsiguranjaID}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="a915db3b-f995-48de-8c6c-27ef683975b4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Polise i ugovori su   uspesno izmenjeni"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putPoliseIUgovori" doc:id="a0e86a66-b5bb-4ea4-863a-21a44f534924" >
+		<flow-ref doc:name="Flow Reference" doc:id="c44604ba-ca4b-441f-9c4a-87a3172ce40e" name="poliseiUgovoriFroPut"/>
+		<db:select doc:name="Select" doc:id="0735fcd2-590e-47ee-9271-ad866bc5d33e" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+polise_osiguranja_kupoprodajni_ugovor
+WHERE kupoprodajniUgovorID = :kupoprodajniUgovorID
+AND poliseOsiguranjaID = :poliseOsiguranjaID
+</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kupoprodajniUgovorID' : attributes.uriParams.kupoprodajniUgovorID,
+'poliseOsiguranjaID' : attributes.uriParams.poliseOsiguranjaID }]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="d63dce85-fc71-4f66-9ad0-9a68097c8f40" >
+			<when expression="#[sizeOf(payload)==0]">
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="3a003cc4-8fa5-40b3-ba2e-fb49bdd95d0c" />
+				<flow-ref doc:name="Flow Reference" doc:id="66c91d64-e81b-4e0d-b4b8-45d3e90a0ef6" name="postPoliseiUgovora"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="3de43971-d5db-41c2-a255-9272895a7b9d" />
+				<flow-ref doc:name="Flow Reference" doc:id="ec1acbbe-b9e9-45e9-b027-6e4dce8d373b" name="updatePoliseIUgovori"/>
+				<file:write doc:name="Write" doc:id="4cf50bf2-fe49-4b13-95c2-8512f39694bd" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="prodavacForPut" doc:id="fecba4db-8e5c-4cd1-a3c8-077fa0b4df81" >
+		<set-variable value="#[message.payload]" doc:name="Body" doc:id="368612bd-747a-4b07-8818-3b3f463b65d9" variableName="body" />
+		<set-variable value="#[message.attributes.uriParams.prodavacID]" doc:name="Prodavac" doc:id="36789064-ea73-4cb3-9308-30caed2ec83b" variableName="prodavacID" />
+	</flow>
+	<flow name="updateProdavac" doc:id="81297dbd-e2c4-4d3c-a66a-43bd8c7f67a1" >
+		<db:update doc:name="Update" doc:id="a595a540-f68b-4c40-b58e-a39c8fc40c5b" config-ref="Database_Config" >
+			<db:sql >UPDATE prodavac
+SET ime = :ime, prezime = :prz, JMBG= :jmbg, adresa= :adr, kontakt = :kon, datumZaposlenja = :dat, korisnikID = :kor
+WHERE prodavacID = :prodavacID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'ime' : payload.ime, 'prz' : payload.prezime, 'jmbg' : payload.JMBG, 'adr' : payload.adresa,
+'kon' : payload.kontakt, 'dat' : payload.datumZaposlenja, 'kor' : payload.korisnikID,
+'prodavacID' : vars.prodavacID}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="be72d4dc-ed7f-4830-be72-d2354059541f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Prodavac je  uspesno izmenjen"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putProdavac" doc:id="06467c6b-3eab-4512-abed-294e3f90ad78" >
+		<flow-ref doc:name="Flow Reference" doc:id="17783f3d-a116-4389-b268-b09ac2482809" name="prodavacForPut"/>
+		<db:select doc:name="Select" doc:id="8d3cae4d-d45c-460d-adf8-84c6930cda5e" config-ref="Database_Config">
+			<db:sql >SELECT *
+
+FROM prodavac
+
+WHERE prodavacID = :prodavacID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'prodavacID' : attributes.uriParams.prodavacID}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="1c997f0e-dc95-4f2d-83fb-a67a0bc67b8e" >
+			<when expression="#[sizeOf(payload)==0]">
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="c30f467d-e7b2-4f42-9afb-eeb0eb33d90b" />
+				<flow-ref doc:name="Flow Reference" doc:id="bda6a877-2aa4-4f42-9ed6-480434f7362b" name="postProdavac"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="3d979c96-9aa3-4e2b-8867-2bcf8d56467f" />
+				<flow-ref doc:name="Flow Reference" doc:id="b06c44e8-445b-47b7-a25c-95a12801e2bc" name="updateProdavac"/>
+				<file:write doc:name="Write" doc:id="a8f111e0-02dd-445a-bc25-7ecebccb86b2" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="poliseOsiguranjaForPut" doc:id="8ffab28c-9f86-469d-863b-93f6f1404377" >
+		<set-variable value="#[message.payload]" doc:name="Body" doc:id="838a7601-013b-4fc2-81c8-3b4ded290788" variableName="body" />
+		<set-variable value="#[message.attributes.uriParams.poliseOsiguranjaID]" doc:name="Polise Osiguranja" doc:id="3dff2fbb-8bf1-4bbe-8f44-ba9e25b94d63" variableName="poliseOsiguranjaID" />
+	</flow>
+	<flow name="updatePoliseOsiguranja" doc:id="a255d475-795e-4ad1-b111-e4666c42528b" >
+		<db:update doc:name="Update" doc:id="a50ddc13-d8f7-4b49-b6c8-4852288ab62a" config-ref="Database_Config">
+			<db:sql >UPDATE polise_osiguranja
+SET vaziOd = :od, vaziDo = :do
+WHERE poliseOsiguranjaID = :poliseOsiguranjaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'od' : payload.vaziOd, 'do' : payload.vaziDo, 'poliseOsiguranjaID' : vars.poliseOsiguranjaID}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="d9e7ac51-27c7-4b5f-8f20-9752dcbd4615" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Polisa osiguranja je  uspesno izmenjena"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putPoliseOsiguranja" doc:id="cacce770-b7df-4979-ba2a-356f48012cba" >
+		<flow-ref doc:name="Flow Reference" doc:id="8632948a-f6f3-40f3-9bd5-e5aa74d7f9ad" name="poliseOsiguranjaForPut"/>
+		<db:select doc:name="Select" doc:id="9230521b-8c85-476c-b3ca-7a149723d303" config-ref="Database_Config">
+			<db:sql >SELECT * FROM 
+polise_osiguranja
+WHERE poliseOsiguranjaID = :poliseOsiguranjaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'poliseOsiguranjaID' : attributes.uriParams.poliseOsiguranjaID}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="62ae9a6d-d20f-4120-b1fc-883b68fda5a3" >
+			<when expression="#[sizeOf(payload)==0]">
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="36b77779-eaea-4380-85b5-f9689b6be746" />
+				<flow-ref doc:name="Flow Reference" doc:id="e6a18141-23c0-44df-9ad1-87133a856bbd" name="postPoliseOsiguranja"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="a8cd062d-7b1a-4a56-896a-e41a8cb148b9" />
+				<flow-ref doc:name="Flow Reference" doc:id="50053594-2557-4e7a-8920-8536fc22ab8e" name="updatePoliseOsiguranja"/>
+				<file:write doc:name="Write" doc:id="622532ff-320b-4f5e-9dfe-d3945a7c951b" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="osiguravajucaKucaFroPut" doc:id="19d287ba-276a-4854-b646-434ae5fce184" >
+		<set-variable value="#[message.payload]" doc:name="Body" doc:id="9b30bb18-ce6a-4b10-8758-751891fab944" variableName="body" />
+		<set-variable value="#[message.attributes.uriParams.osiguravajucaKucaID]" doc:name="Osiguravajuca kuca" doc:id="267555ae-2933-48f4-9401-f11002f9ce78" variableName="osiguravajucaKucaID" />
+	</flow>
+	<flow name="updateOsiguravajucaKuca" doc:id="e3790a9c-2672-4644-b89a-0a8cbdcbf2c5" >
+		<db:update doc:name="Update" doc:id="7784a6cf-229b-4878-8641-f3628f0e48e1" config-ref="Database_Config">
+			<db:sql >UPDATE osiguravajuca_kuca
+SET nazivOsiguravajuceKuce = :naz
+WHERE osiguravajucaKucaID = :osiguravajucaKucaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'naz' : payload.nazivOsiguravajuceKuce, 'osiguravajucaKucaID' : vars.osiguravajucaKucaID}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="a81b4327-7dc1-4aef-93b3-05861b54a256" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Osiguravajuca kuca je  uspesno izmenjena"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putOsiguravajucaKuca" doc:id="46921c96-20bb-4cb1-bae9-5b9433dc7110" >
+		<flow-ref doc:name="Flow Reference" doc:id="2a791dde-a922-4b41-8cce-b7ac7c2c5b6c" name="osiguravajucaKucaFroPut"/>
+		<db:select doc:name="Select" doc:id="c3303025-5ade-49f6-bd3e-c83cf439988c" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+osiguravajuca_kuca
+WHERE osiguravajucaKucaID = :osiguravajucaKucaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'osiguravajucaKucaID' : attributes.uriParams.osiguravajucaKucaID}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="a16daaba-92c0-4b8d-bfa3-89299ce7d9cd" >
+			<when expression="#[sizeOf(payload)==0]">
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="c390c662-2a9d-49b9-845c-ee44174715a7" />
+				<flow-ref doc:name="Flow Reference" doc:id="f3740623-f034-41cd-b506-8ba740568624" name="postOsiguravajucaKuca"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="dc575394-d908-4a13-a06d-0eb24522eb00" />
+				<flow-ref doc:name="Flow Reference" doc:id="21b410b5-593e-4dbf-a741-d2d0e35c543c" name="updateOsiguravajucaKuca"/>
+				<file:write doc:name="Write" doc:id="fa3f3b65-5b80-4732-b89c-957d8d9b9f9b" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW"/>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="kupoprodajniUgovorforPut" doc:id="82025c4b-a08c-4047-ac9d-7132dc4911c7" >
+		<set-variable value="#[message.payload]" doc:name="Body" doc:id="909abc0a-bc99-49a5-83de-caa79422b469" variableName="body" />
+		<set-variable value="#[message.attributes.uriParams.kupoprodajniUgovorID]" doc:name="Kupoprodajni ugovor" doc:id="146d0463-3d1f-42ec-b263-2aee6513ba5a" variableName="kupoprodajniUgovorID" />
+	</flow>
+	<flow name="updateKupoprodajniUgovor" doc:id="447de1e2-8883-4e45-b2f1-7d0b5ec47f96" >
+		<db:update doc:name="Update" doc:id="c9070db8-d6da-475f-87d5-f1d576eb7222" config-ref="Database_Config">
+			<db:sql >UPDATE kupoprodajni_ugovor
+SET datumSklapanja = :dat, nacinPlacanja = :nac, cena = :cena, automobilID = :aut, 
+kupacID = :kup, prodavacID = :pro
+WHERE kupoprodajniUgovorID = :kupoprodajniUgovorID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'dat' : payload.datumSklapanja, 'nac' : payload.nacinPlacanja, 'cena' : payload.cena,
+'aut' : payload.automobilID, 'kup' : payload.kupacID, 'pro' : payload.prodavacID,
+'kupoprodajniUgovorID' : vars.kupoprodajniUgovorID}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="92ddf87a-2b82-4cd8-a562-5c7b30800323" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Kupoprodajni ugovor je  uspesno izmenjen"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putKupoprodajniUgovor" doc:id="0640a1e1-02bb-457a-80d6-59cde070434b" >
+		<flow-ref doc:name="Flow Reference" doc:id="faeae240-5ab8-4f9f-a17d-ad8d33fa62ad" name="kupoprodajniUgovorforPut"/>
+		<db:select doc:name="Select" doc:id="ef514be8-1921-440c-8363-9d1cd0c03a61" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+kupoprodajni_ugovor
+WHERE kupoprodajniUgovorID = :kupoprodajniUgovorID
+</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kupoprodajniUgovorID' : attributes.uriParams.kupoprodajniUgovorID}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="010c396e-bec4-4c30-97fc-10c7e466aaa2" >
+			<when expression="#[sizeOf(payload)==0]">
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="1cb517b6-d038-4aab-949a-cb67d7d8d2ae" />
+				<flow-ref doc:name="Flow Reference" doc:id="a5be89f7-be2d-46c5-8b66-660f77808abf" name="postKupoprodajniUgovor"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="2795043c-96cb-4aa6-bd0f-31203c786010" />
+				<flow-ref doc:name="Flow Reference" doc:id="bce67feb-c5ca-4382-8c01-3c6fdf8ead47" name="updateKupoprodajniUgovor"/>
+				<file:write doc:name="Write" doc:id="155c1ae6-8ee9-4296-89db-9dd138e156a1" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="kupacForPut" doc:id="f99b1850-51e5-4d71-97aa-364b8b0dbcb2" >
+		<set-variable value="#[message.payload]" doc:name="Body" doc:id="6d6623f1-da1c-4067-ab82-ca7b0f95ecde" variableName="body" />
+		<set-variable value="#[message.attributes.uriParams.kupacID]" doc:name="Kupac" doc:id="9d600498-0d10-4fcf-bd98-df4a7ef8fa25" variableName="kupacID" />
+	</flow>
+	<flow name="updateKupac" doc:id="d7fa43d3-59d3-41b2-ad3d-eef11a907356" >
+		<db:update doc:name="Update" doc:id="77456e8f-3c5c-4a1a-b1ff-02956016e6d1" config-ref="Database_Config">
+			<db:sql >UPDATE kupac
+SET ime = :ime, prezime = :prz, JMBG = :jmbg, adresa= :adr, kontakt = :kont, korisnikID = :kor, popustNaKupovinu = :pop
+WHERE kupacID = :kupacID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'ime' : payload.ime, 'prz' : payload.prezime, 'jmbg' : payload.JMBG,
+'adr' : payload.adresa, 'kont' : payload.kontakt, 'kor' : payload.korisnikID, 'pop' : payload.popustNaKupovinu,
+'kupacID' : vars.kupacID}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="8c13f466-0d50-429d-b101-d63e98bbf248" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Kupac je  uspesno izmenjen"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putKupac" doc:id="1ba55cf0-6215-4fdd-893d-e6df25c50b17" >
+		<flow-ref doc:name="Flow Reference" doc:id="c968c583-70aa-42aa-823e-e9b4f8d70002" name="kupacForPut"/>
+		<db:select doc:name="Select" doc:id="73bfa1f3-992a-4fb2-8425-5dd4370b4b86" config-ref="Database_Config">
+			<db:sql >SELECT *
+
+FROM kupac
+
+WHERE kupacID = :kupacID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kupacID' : attributes.uriParams.kupacID}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="c686f38e-24d2-4867-8497-d6720d71cf2a" >
+			<when expression="#[sizeOf(payload)==0]">
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="2198c498-79f0-4d06-8306-4d0e0026a4ad" />
+				<flow-ref doc:name="Flow Reference" doc:id="e9a54e74-0c18-4435-8d77-39f09f42a152" name="postKupac"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="2f1cc9ca-da86-4dd3-b942-9e90728d3fb9" />
+				<flow-ref doc:name="Flow Reference" doc:id="b7afbe1d-c653-4fd1-8469-e58b9ff65807" name="updateKupac"/>
+				<file:write doc:name="Write" doc:id="d0f90096-21f1-4dba-a525-a13e50c997cf" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="dodatnizahtevForPut" doc:id="07416f28-eb7d-47c7-87c2-aa05373f31f0" >
+		<set-variable value="#[message.payload]" doc:name="Body" doc:id="d8ffbe64-eaa4-4172-9347-3f1639b3f3e8" variableName="body" />
+		<set-variable value="#[message.attributes.uriParams.dodatniZahtevID]" doc:name="Dodatni Zahtev" doc:id="fd20679d-d62d-4e4a-ad97-c11290576ecc" variableName="dodatniZahtevID" />
+	</flow>
+	<flow name="updateDodatniZahtev" doc:id="d5bf6e92-df83-4cf5-9814-3b096268163c" >
+		<db:update doc:name="Update" doc:id="d7cfa41c-5af4-47f0-a3eb-0a486273abfe" config-ref="Database_Config">
+			<db:sql >UPDATE dodatnizahtev
+SET opisZahteva = :opis, datumPodnosenja = :datum, kupoprodajniUgovorID = :ugovor
+WHERE dodatniZahtevID = :dodatniZahtevID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'opis'  : payload.opisZahteva, 'datum' : payload.datumPodnosenja, 'ugovor' : payload.kupoprodajniUgovorID,
+'dodatniZahtevID' : vars.dodatniZahtevID}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="4c76cc9d-d63f-4a73-ad15-c7623edbe21d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Dodatni zahtev je  uspesno izmenjen"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putDodatniZahtev" doc:id="7a1244d7-d5e5-4a4b-a3e9-b021241ca4e4" >
+		<flow-ref doc:name="Flow Reference" doc:id="cc3a1e7a-ccaa-40ed-9972-4d3bc820673a" name="dodatnizahtevForPut"/>
+		<db:select doc:name="Select" doc:id="1c43ee5f-534b-44ac-b9d6-c74ce5125a45" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+dodatnizahtev
+WHERE dodatniZahtevID = :dodatniZahtevID
+</db:sql>
+			<db:input-parameters ><![CDATA[#[{'dodatniZahtevID' : attributes.uriParams.dodatniZahtevID}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="6c73330a-bdea-4359-9b23-117a3e3effe3" >
+			<when expression="#[sizeOf(payload)==0]">
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="f04c3a3b-86da-4af4-9122-b12527a19e93" />
+				<flow-ref doc:name="Flow Reference" doc:id="56811fda-399c-4077-8cbe-df04d91ef2f8" name="postDodatniZahtev"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="1b656662-2ec0-4009-bd17-ec8a041598a7" />
+				<flow-ref doc:name="Flow Reference" doc:id="ccedd3eb-7a51-4d7f-8d66-4df39623f7d5" name="updateDodatniZahtev"/>
+				<file:write doc:name="Write" doc:id="5067d926-834e-4cd8-88ca-cab00e48848a" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="automobilForPut" doc:id="93e5242e-81b7-4778-9f6c-622d75fb0ebf" >
+		<set-variable value="#[message.payload]" doc:name="Body" doc:id="5c8660ae-19af-4990-b75b-50e6eacfadd2" variableName="body" />
+		<set-variable value="#[message.attributes.uriParams.automobilID]" doc:name="Automobil" doc:id="7cd78232-70c4-4e76-a30b-5a1ef1bfd017" variableName="automobilID" />
+	</flow>
+	<flow name="updateAutomobil" doc:id="478c7aef-4603-4958-af90-990651a76c3e" >
+		<db:update doc:name="Update" doc:id="f6409412-4b59-4728-b121-31562515579d" config-ref="Database_Config">
+			<db:sql >UPDATE automobil
+SET kubikaza = :kub, brojSasije = :br, konjskaSnaga = :snaga, bojaAutomobila = :boja,
+godinaProizvodnje = :god, markaID = :mar, tipAutomobilaID = :tip , servisID = :ser 
+WHERE automobilID = :automobilID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kub' : payload.kubikaza, 'br' : payload.brojSasije,
+'snaga' : payload.konjskaSnaga, 'boja' : payload.bojaAutomobila,
+'god' : payload.godinaProizvodnje, 'mar' : payload.markaID, 'tip' : payload.tipAutomobilaID,
+'ser' : payload.servisID, 'automobilID' : vars.automobilID}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="89362a11-d955-4ab2-a755-5e3ba186137f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Automobil je  uspesno izmenjen"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putAutomobil" doc:id="a4d208f1-588d-4823-ac18-bea93baf3fb4" >
+		<flow-ref doc:name="Flow Reference" doc:id="0ba22888-3e47-45ee-9420-501eec91d30d" name="automobilForPut"/>
+		<db:select doc:name="Select" doc:id="f9257b63-4c47-4f4a-9c76-3911c17b1e2b" config-ref="Database_Config">
+			<db:sql >SELECT *
+
+FROM automobil
+
+WHERE automobilID = :automobilID
+</db:sql>
+			<db:input-parameters ><![CDATA[#[{'automobilID' : attributes.uriParams.automobilID}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="96754434-3908-4386-87cd-ab2d04f16fdf" >
+			<when expression="#[sizeOf(payload)==0]">
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="0460f709-78a3-490b-a201-29c6d05c3c6a" />
+				<flow-ref doc:name="Flow Reference" doc:id="12cb4179-94d6-4d1c-a005-5bbd48536555" name="postAutomobil"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="0a8dfd04-3ed3-46b8-9b74-bfa172edbde6" />
+				<flow-ref doc:name="Flow Reference" doc:id="0bcebb7d-b7d0-4012-a511-abbf251e5707" name="updateAutomobil"/>
+				<file:write doc:name="Write" doc:id="a9a0b40c-66c2-422b-bfa0-2b939d7b7f89" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="korisnikForPut" doc:id="24e4c096-fbc6-4358-a7ff-18a958ef2ec9" >
+		<set-variable value="#[message.payload]" doc:name="Body" doc:id="e04e2c51-c34e-4484-b050-decf4799bff4" variableName="body" />
+		<set-variable value="#[message.attributes.uriParams.korisnikID]" doc:name="Korisnik" doc:id="33ecda69-10b0-48dc-b190-feee62f24d34" variableName="korisnikID" />
+	</flow>
+	<flow name="updateKorisnik" doc:id="c8b5fc1d-72f6-481a-bcef-c874e277389b" >
+		<db:update doc:name="Update" doc:id="b2da4068-3520-4c85-8941-2a6e99ec9618" config-ref="Database_Config">
+			<db:sql >UPDATE korisnik
+ SET email = :email, password = :pass, uloga = :uloga
+  WHERE korisnikID = :korisnikID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'email' : payload.email, 'pass' : payload.password, 'uloga' : payload.uloga, 'korisnikID' : vars.korisnikID}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="6a63002d-51f9-4a38-9028-572071dfbfee" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Korisnik je  uspesno izmenjen"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putKorisnik" doc:id="88ca30f3-fcfb-42b3-af28-26c8ccc4ade5" >
+		<flow-ref doc:name="Flow Reference" doc:id="305cfc8b-f616-4f60-9b23-fd5dfe39533f" name="korisnikForPut"/>
+		<db:select doc:name="Select" doc:id="2c3237f2-e3f6-4ff0-959d-0ef38d6f0dde" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+korisnik 
+WHERE korisnikID = :korisnikID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'korisnikID' : attributes.uriParams.korisnikID}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="32251619-15b6-487b-b490-5f8741b7e348" >
+			<when expression="#[sizeOf(payload)==0]">
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="2591a969-242b-47a1-a2e8-7535afa31641" />
+				<flow-ref doc:name="Flow Reference" doc:id="759b8143-5d53-4fa9-aad4-dde2f61af0c8" name="postKorisnik"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="db519f86-a782-4d56-b105-26ba4389779e" />
+				<flow-ref doc:name="Flow Reference" doc:id="22bc8d72-a901-4a48-b291-48581476099d" name="updateKorisnik"/>
+				<file:write doc:name="Write" doc:id="f28f79ea-5e02-4eed-8cf2-58cdf2b0a214" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="markaForPut" doc:id="7dd52cd5-787b-4b32-af27-d33a524801f9" >
+		<set-variable value="#[message.payload]" doc:name="Body" doc:id="198224d6-b5bf-45c1-9c0c-110140a4e69a" variableName="body"/>
+		<set-variable value="#[message.attributes.uriParams.markaID]" doc:name="Marka" doc:id="f11e3f68-7a11-45a4-bca6-92b6f949f350" variableName="markaID"/>
+	</flow>
+	<flow name="updateMarka" doc:id="ad170248-7bc2-4fe5-b3a2-f2cd3c5af564" >
+		<db:update doc:name="Update" doc:id="89277e0d-af64-41b5-9bbb-e3c2a39ee2dc" config-ref="Database_Config">
+			<db:sql >UPDATE marka
+ SET nazivMarke = :marka, modelID = :model 
+  WHERE markaID = :markaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'marka' : payload.nazivMarke, 'model' : payload.modelID, 'markaID' : vars.markaID}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="1660a597-2cd4-416e-b36e-8fc2988a2046" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Marka je  uspesno izmenjena"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putMarka" doc:id="35fe8ab6-90ef-4450-b6b1-18b8dfeb0413" >
+		<flow-ref doc:name="Flow Reference" doc:id="623ce5be-7b46-4439-8fde-3e24c3807d7f" name="markaForPut"/>
+		<db:select doc:name="Select" doc:id="e205f4dd-551c-4a52-92ab-e99dd683855f" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+marka 
+WHERE markaID = :markaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'markaID' : attributes.uriParams.markaID}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="90030850-24df-43ed-99dd-bba9d01fc470" >
+			<when expression="#[sizeOf(payload)==0]">
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="fd7a8e2d-0ada-4b33-9f35-d4cf8f4e817e" />
+				<flow-ref doc:name="Flow Reference" doc:id="3dc7d64c-5b51-4252-a74a-efb46a9a2800" name="postMarka"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="1d4c3c37-273b-4ce1-bffb-74a94755d21c" />
+				<flow-ref doc:name="Flow Reference" doc:id="f4e3dc3b-0358-4e33-a229-630b992d2e63" name="updateMarka"/>
+				<file:write doc:name="Write" doc:id="c953f3c3-06df-4919-a93f-fe0fe17725f7" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="modelForPut" doc:id="e53a1b03-bea3-464c-867d-e697fecebeea" >
+		<set-variable value="#[message.payload]" doc:name="Body" doc:id="7448bddd-e18e-4f8b-afdd-cc00cc354ee9" variableName="body"/>
+		<set-variable value="#[message.attributes.uriParams.modelID]" doc:name="Model" doc:id="27b0291f-b512-40d3-aa8f-8f04e46f5f02" variableName="modelID"/>
+	</flow>
+	<flow name="updateModel" doc:id="c9dbdddf-59b4-4761-a916-c040eb958d39" >
+		<db:update doc:name="Update" doc:id="98dc1f8d-706b-43ff-88d3-ef5709f7f715" config-ref="Database_Config">
+			<db:sql >UPDATE model
+ SET nazivModela = :model
+  WHERE modelID = :modelID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'model' : payload.nazivModela, 'modelID' : vars.modelID}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="2d277afc-f84f-4620-a09b-e0386b0854b2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Model je  uspesno izmenjen"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putModel" doc:id="2c95e05e-f35e-40d3-8514-b42fa4aadff1" >
+		<flow-ref doc:name="Flow Reference" doc:id="80b6c0de-7fa2-4ff5-bbed-4bbc3f77a304" name="modelForPut"/>
+		<db:select doc:name="Select" doc:id="31a129e1-ef75-4223-ab66-8f82fb2119fe" config-ref="Database_Config">
+			<db:sql >SELECT *
+
+FROM model
+
+WHERE modelID = :modelID
+</db:sql>
+			<db:input-parameters ><![CDATA[#[{'modelID' : attributes.uriParams.modelID}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="2da027e1-3415-46a2-8e1e-ab7592828183" >
+			<when expression="#[sizeOf(payload)==0]">
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="51b8ac45-8866-4e9f-8fd6-7ea047b2857e" />
+				<flow-ref doc:name="Flow Reference" doc:id="107f5681-e764-4154-aa3c-37f4519f5917" name="postModel"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="7375ade3-d19e-43cd-8bff-bfdc79c540fa" />
+				<flow-ref doc:name="Flow Reference" doc:id="346ad57f-4233-4ac2-9ef0-b1119ab8cffd" name="updateModel"/>
+				<file:write doc:name="Write" doc:id="dbd12697-ffb8-4412-a81e-a96a572df376" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="servisForPut" doc:id="5ded3749-a5bb-4f74-9da1-e961cd309f7f" >
+		<set-variable value="#[message.payload]" doc:name="Body" doc:id="eb3260e4-0e88-4058-8f53-c70361936837" variableName="body"/>
+		<set-variable value="#[message.attributes.uriParams.servisID]" doc:name="Servis" doc:id="74bcf49b-a31c-4f2d-860c-865a1835e92a" variableName="servisID"/>
+	</flow>
+	<flow name="updateServis" doc:id="4c61c2a8-dd59-4802-9027-0788d0ef3887" >
+		<db:update doc:name="Update" doc:id="cda1ff75-e17e-454d-8caa-1d86d708ab5c" config-ref="Database_Config">
+			<db:sql >UPDATE servis_automobila
+ SET datumServisiranja = :dat, opis = :opis, cenaServisa= :cena, aktuelan = :akt
+  WHERE servisID = :servisID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'dat' : payload.datumServisiranja, 'opis' : payload.opis, 'cena' : payload.cenaServisa,
+'akt' : payload.aktuelan, 'servisID' : vars.servisID}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="73bd3159-06ac-4013-acf5-62291c9d3b93" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Servis je uspesno izmenjen"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putServis" doc:id="9a3193b3-79d5-44f1-9373-d5d59a83047d" >
+		<flow-ref doc:name="Flow Reference" doc:id="607f15bf-346a-4292-8498-5ec22dde8653" name="servisForPut"/>
+		<db:select doc:name="Select" doc:id="1af6c4b7-e87e-4482-a3fc-42102ca66591" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+servis_automobila
+WHERE servisID = :servisID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'servisID' : attributes.uriParams.servisID}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="431678d8-ce1b-42b2-b7f9-a82e8257fc4b" >
+			<when expression="#[sizeOf(payload)==0]">
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="890ec404-850f-4a0e-9538-ec0f04c88cb4" />
+				<flow-ref doc:name="Flow Reference" doc:id="3b99e40a-a89d-4c7a-b12b-1a678b913e47" name="postServis"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="8fd40eb6-792d-48bd-bfeb-a3fa32be5adf" />
+				<flow-ref doc:name="Flow Reference" doc:id="c7815204-29ce-4352-9e74-6781d5abb11e" name="updateServis"/>
+				<file:write doc:name="Write" doc:id="5da5246f-b849-4978-a518-84728a6904d0" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW"/>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="tipAutomobilaForPut" doc:id="7e5e9042-73bd-4eb5-b0ad-def7eba97730" >
+		<set-variable value="#[message.payload]" doc:name="Body" doc:id="e100e1d9-1e70-40a7-8ef7-9aa660e913c3" variableName="body" />
+		<set-variable value="#[message.attributes.uriParams.tipAutomobilaID]" doc:name="tip automobila" doc:id="1bf4a38d-1c5e-44b4-bfb6-a7ddfcb8ef5a" variableName="tipAutomobilaID" />
+	</flow>
+	<flow name="updateTipAutomobila" doc:id="0098e54a-76d4-4465-aa9c-a4e08f735647" >
+		<db:update doc:name="Update" doc:id="87b9c2fe-77c0-47f2-9064-7513ce3fc3d5" config-ref="Database_Config">
+			<db:sql >UPDATE tip_automobila
+ SET nazivTipaAutomobila = :tip
+ WHERE tipAutomobilaID = :tipAutomobilaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'tip' : payload.nazivTipaAutomobila, 'tipAutomobilaID' : vars.tipAutomobilaID}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="918e8099-3a3e-4c0b-97d5-8ef3734b3e71" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Tip automobila  je uspesno izmenjen"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putTipAutomobila" doc:id="d25316c8-155b-4d5a-85dc-46a630efc3be" >
+		<flow-ref doc:name="Flow Reference" doc:id="c3c5d6e8-2de9-4703-888f-9458d02c4abe" name="tipAutomobilaForPut"/>
+		<db:select doc:name="Select" doc:id="7e50d361-e20e-4d0a-b85f-87752fa91e38" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+tip_automobila
+WHERE tipAutomobilaID = :tipAutomobilaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'tipAutomobilaID' : attributes.uriParams.tipAutomobilaID}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="63feb6f3-c786-4a98-a465-c8e51c9f0476" >
+			<when expression="#[sizeOf(payload)==0]">
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="e3eeefa6-4241-46a0-8b02-cbd9dddcef68" />
+				<flow-ref doc:name="Flow Reference" doc:id="dbea2150-74f5-491a-81e8-ddeff1be53a4" name="postTipAutomobila"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="4a63eb91-6e5b-4328-9f49-038f34f61ec4" />
+				<flow-ref doc:name="Flow Reference" doc:id="1bcd80c5-2617-47ae-9ae1-6f8e90783b2f" name="updateTipAutomobila"/>
+				<file:write doc:name="Write" doc:id="22158476-f6a4-42d7-b42b-ef8f2df6c870" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="postAutomobil" doc:id="1bae1e88-ab7c-429e-9d25-f6920fbc8a8b" >
+		<db:insert doc:name="Insert" doc:id="63cb4cba-443a-42d7-9a71-7480be190ddd" config-ref="Database_Config">
+			<db:sql >insert into automobil (kubikaza,brojSasije,konjskaSnaga,bojaAutomobila,godinaProizvodnje,markaID,tipAutomobilaID,servisID)
+values(:kub,:sas,:sng,:boja,:god,:mar,:tip,:serv)</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kub' : payload.kubikaza, 'sas' : payload.brojSasije, 'sng' : payload.konjskaSnaga, 'boja' : payload.bojaAutomobila, 'god' : payload.godinaProizvodnje, 'mar' : payload.markaID, 'tip' : payload.tipAutomobilaID, 'serv' : payload.servisID}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="84353e2e-6cde-40f0-bcc8-4714afb87e05" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Automobil je uspesno dodat"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postPoliseOsiguranja" doc:id="567ea7bf-c460-4476-8923-a65ef4a1d2e3" >
+		<db:insert doc:name="Insert" doc:id="6ddcfceb-2b4d-4ff9-907f-6541dfe95df3" config-ref="Database_Config">
+			<db:sql >insert into polise_osiguranja (vaziOd,vaziDo,osiguravajucaKucaID)
+values(:od,:do,:kuca)</db:sql>
+			<db:input-parameters ><![CDATA[#[{'od' : payload.vaziOd, 'do' : payload.vaziDo, 'kuca' : payload.osiguravajucaKucaID}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="b37a3c7d-0dde-435f-ae2e-05d726cc2851" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Polisa osiguranja je uspesno dodata"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postDodatniZahtev" doc:id="ed6a3da3-e097-4dc2-884b-a1bc7fdb6115">
+		<db:insert doc:name="Insert" doc:id="a92a37fe-86b1-4dca-b857-569065bd1063" config-ref="Database_Config">
+			<db:sql>insert into dodatnizahtev (opisZahteva,datumPodnosenja,kupoprodajniUgovorID)
+values(:opis,:datum,:ugovor)</db:sql>
+			<db:input-parameters><![CDATA[#[{'opis' : payload.opisZahteva, 'datum' : payload.datumPodnosenja, 'ugovor' : payload.kupoprodajniUgovorID}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="9995a524-5140-4feb-914f-fccdc1d24509">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+"Dodatni zahtev je uspesno dodat"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postOsiguravajucaKuca" doc:id="dfb47d0d-11c7-4395-9020-ea598eedae36" >
+		<db:insert doc:name="Insert" doc:id="2a4ca745-6636-4f55-8afe-f0a43aa1cda4" config-ref="Database_Config">
+			<db:sql >insert into osiguravajuca_kuca (nazivOsiguravajuceKuce)
+values (:naziv)</db:sql>
+			<db:input-parameters ><![CDATA[#[{'naziv' : payload.nazivOsiguravajuceKuce}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="84d138c8-521b-4939-9165-8c16c8fe7e64" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Osiguravajuca kuca je uspesno dodata"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postKupoprodajniUgovor" doc:id="cfd7feb4-4289-492a-a1da-4971ff347a7f">
+		<db:insert doc:name="Insert" doc:id="58bc433d-141e-4d62-8984-afb359ee33bb" config-ref="Database_Config">
+			<db:sql>insert into kupoprodajni_ugovor (datumSklapanja,nacinPlacanja,cena,automobilID,kupacID,prodavacID)
+values (:dat,:plac,:cena,:aut,:kup,:prod)</db:sql>
+			<db:input-parameters><![CDATA[#[{'dat' : payload.datumSklapanja, 'plac' : payload.nacinPlacanja, 'cena' : payload.cena, 'aut' : payload.automobilID, 'kup' :  payload.kupacID, 'prod' : payload.prodavacID}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="9b89879b-da4d-4ca2-8f74-7734e673ea81">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+"Kupoprodajni ugovor je uspesno dodat"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postTipAutomobila" doc:id="ef589466-9c3e-4eab-8da8-a86bbc506ba8" >
+		<db:insert doc:name="Insert" doc:id="27c5d2ce-669e-4849-80c5-00d3b0add412" config-ref="Database_Config">
+			<db:sql >insert into tip_automobila (nazivTipaAutomobila)
+values (:nazivTipa)</db:sql>
+			<db:input-parameters ><![CDATA[#[{ 'nazivTipa': payload.nazivTipaAutomobila }]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="0f108c4c-57e9-4302-85b7-ddcfae764fd4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Tip automobila je uspesno dodat"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postKupac" doc:id="1a720387-82e4-4da4-91f6-89bd5eae5ab3" >
+		<db:insert doc:name="Insert" doc:id="8b8bd0cc-024e-432e-b1f4-2d21753f261d" config-ref="Database_Config">
+			<db:sql >insert into kupac (ime,prezime,JMBG,adresa,kontakt,popustNaKupovinu,korisnikID)
+values (:ime, :prz, :jmbg, :adr, :kont, :popust, :korisnik)</db:sql>
+			<db:input-parameters ><![CDATA[#[{'ime' : payload.ime, 'prz' : payload.prezime, 'jmbg' : payload.JMBG, 'adr' : payload.adresa, 'kont' : payload.kontakt, 'popust' : payload.popustNaKupovinu, 'korisnik' : payload.korisnikID}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="f3ed2a7c-6e9c-4265-802e-b902f5490a97" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Kupac je uspesno dodat"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postPoliseiUgovora" doc:id="f1377a80-dca7-4160-842e-0ecd9c59151a" >
+		<db:insert doc:name="Insert" doc:id="09830a59-9524-4c57-8d11-b76481d76629" config-ref="Database_Config">
+			<db:sql >insert into polise_osiguranja_kupoprodajni_ugovor (kupoprodajniUgovorID,poliseOsiguranjaID,brojPoliseUgovora)
+values (:kp,:po,:br)</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kp': payload.kupoprodajniUgovorID, 'po' : payload.poliseOsiguranjaID, 'br' : payload.brojPoliseUgovora}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="ebcd7c3c-1aff-4b3f-8449-8171f4530cab" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Polise i ugovori su uspesno dodati"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postModel" doc:id="a17c6ab1-eba4-45d6-8b15-c8c6e4e845a3" >
+		<db:insert doc:name="Insert" doc:id="93f54d8a-d44e-4091-abb2-9b1c6796f1d5" config-ref="Database_Config">
+			<db:sql >insert into model (nazivModela)
+values (:naziv)</db:sql>
+			<db:input-parameters ><![CDATA[#[{'naziv' : payload.nazivModela}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="2cd83a4e-3d74-4b08-9eed-a726b5972582" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Model je uspesno dodat"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postKorisnik" doc:id="6572e930-07c2-4397-9db4-5a86c41f0e21" >
+		<db:insert doc:name="Insert" doc:id="a29b901f-4875-452c-9700-22de39c3fe66" config-ref="Database_Config">
+			<db:sql >insert into korisnik (email,password,uloga)
+values (:email,:pass,:uloga)</db:sql>
+			<db:input-parameters ><![CDATA[#[{'email' : payload.email, 'pass' : payload.password, 'uloga' : payload.uloga}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="503d952c-75a3-4b7f-b277-3f7269497f85" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Korisnik je uspesno dodat"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postMarka" doc:id="0e3aed0d-9de8-4142-9cd1-0591b1ab216e" >
+		<db:insert doc:name="Insert" doc:id="bc7d5866-3161-4f73-ab28-b9046da66196" config-ref="Database_Config">
+			<db:sql >insert into marka (nazivMarke, modelID)
+values (:marka,:model)</db:sql>
+			<db:input-parameters ><![CDATA[#[{'marka' : payload.nazivMarke, 'model' : payload.modelID}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="90a43507-8d6b-4720-8c92-d3d1b31007a3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Marka je dodata"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postProdavac" doc:id="7a291035-495f-4cb4-af66-b5a860fe382d" >
+		<db:insert doc:name="Insert" doc:id="1ad2bd52-b552-4fca-8a8d-93d3e1489272" config-ref="Database_Config">
+			<db:sql >insert into prodavac (ime,prezime,JMBG,adresa,kontakt,datumZaposlenja,korisnikID)
+values (:ime,:prz,:jmbg,:adresa,:kontakt,:datum,:korisnik)</db:sql>
+			<db:input-parameters ><![CDATA[#[{'ime' : payload.ime, 'prz' : payload.prezime, 'jmbg' : payload.JMBG, 'adresa' : payload.adresa, 'kontakt' : payload.kontakt, 'datum' : payload.datumZaposlenja, 'korisnik' : payload.korisnikID }]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="04ae4920-0518-40eb-98e3-4c597fed9cb9">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+"Prodavac je uspesno dodat"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postServis" doc:id="51cf8c7b-d526-4be4-8914-578cfc164ddf" >
+		<db:insert doc:name="Insert" doc:id="416813c5-6e78-4f93-a4a2-3a9507aade97" config-ref="Database_Config">
+			<db:sql >INSERT INTO servis_automobila (datumServisiranja,opis,cenaServisa,akutelan)
+VALUES (:datum,:opis,:cena,:aktuelan)</db:sql>
+			<db:input-parameters ><![CDATA[#[{'datum' : payload.datumServisiranja, 
+'opis' : payload.opis, 
+'cena' : payload.cenaServisa, 
+'aktuelan' : payload.aktuelan}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="b264e329-3b75-4cf7-abf4-5970745d66cc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Servis je uspesno dodat"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllAutomobil" doc:id="a9464f7b-1b8e-4b76-b851-9255bc848c5d" >
+		<db:select doc:name="Select_AllAutomobil" doc:id="6b52e919-4b77-4d50-a48c-4deb4f3a6099" config-ref="Database_Config">
+			<db:sql >SELECT * FROM 
+erp_autosalon.automobil</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="802d8917-0cde-4353-9086-439564fcf116" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAutomobilByID" doc:id="4ed41851-0e23-467a-b1fc-1779193b48bd" >
+		<db:select doc:name="Select_AutomobilByID" doc:id="c2633e6f-e6eb-4277-a861-d10af60ff1e0" config-ref="Database_Config">
+			<db:sql >SELECT *
+
+FROM automobil
+
+WHERE automobilID = :automobilID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'automobilID' : attributes.uriParams.automobilID}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="6d39f709-ce0d-4ba5-8667-5e1ee86f6fe7" message="#['Automobil nije pronadjen']">
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:INVALID_ID" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Transform Message" doc:id="e33b6ea2-5e15-4fd7-a268-245da4b18433" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllKupac" doc:id="a5939e1d-6c9f-4d2d-828b-86bb680a96e0" >
+		<db:select doc:name="Select_AllKupac" doc:id="c86d400a-3fcc-4b24-9b25-0d0cc407af0a" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+kupac</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="9a15c94e-c96a-4eb8-9513-ca8b3acea6c8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getKupacByID" doc:id="42855663-d424-4f18-8859-02ce3edea76b" >
+		<db:select doc:name="Select_KupacByID" doc:id="429ba638-5069-42df-92da-e36cd4576f1d" config-ref="Database_Config">
+			<db:sql >SELECT *
+
+FROM kupac
+
+WHERE kupacID = :kupacID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kupacID' : attributes.uriParams.kupacID}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="31a686cd-0670-45d6-a2be-edc727c45b51" message="#['Kupac nije pronadjen']">
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:INVALID_ID" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Transform Message" doc:id="23a10811-bf1b-4a74-a6f2-561e0896fa51" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllProdavac" doc:id="a3687562-7b12-46a0-a631-74c8e1eb94ac" >
+		<db:select doc:name="Select" doc:id="e33fb4bc-3f43-42b7-a2e3-0e350d44fc82" config-ref="Database_Config">
+			<db:sql >SELECT  * FROM
+prodavac</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="170f60b7-1244-4417-8d01-dc04b50b5dd9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getProdavacByID" doc:id="3f9a4287-8cb8-4579-8ea1-c056e65f0616" >
+		<db:select doc:name="Select_ProdavacByID" doc:id="65cb0e72-5732-4990-b37e-a1ceaeb31097" config-ref="Database_Config" >
+			<db:sql >SELECT *
+
+FROM prodavac
+
+WHERE prodavacID = :prodavacID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'prodavacID' : attributes.uriParams.prodavacID}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="c5fc61f4-33af-4175-9de1-837b52a72edf" message="#['Prodavac nije pronadjen']">
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:INVALID_ID" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Transform Message" doc:id="a3eaa881-49b5-4faf-bb24-e65cf9973d0c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllModel" doc:id="1fc6b622-6af8-4d86-abcd-2c32b8f6013d" >
+		<db:select doc:name="Select_AllModel" doc:id="f9821272-2ca0-402a-8e35-067849693b03" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+model</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="fde5828e-6ec7-4228-b323-da5166f9ce0f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getModelByID" doc:id="7e57da80-0ca5-4816-aec5-5a5f1e02040e" >
+		<db:select doc:name="Select_ModelByID" doc:id="d12c57e6-0fe7-4aa8-8c0a-e2f8576efac4" config-ref="Database_Config">
+			<db:sql >SELECT *
+
+FROM model
+
+WHERE modelID = :modelID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'modelID' : attributes.uriParams.modelID}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="fcaefeb2-edd8-4676-a9d0-dee32ae877cd" message="#['Model nije pronadjen']">
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:INVALID_ID" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Transform Message" doc:id="76b1662a-1d80-41c7-82d7-6e24d6e26f0c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllMarka" doc:id="c96aac53-afb1-4409-8283-b2548de76ab5" >
+		<db:select doc:name="Select" doc:id="11e6eec2-1001-4cc0-a3e7-88607974a2ab" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+marka</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="cae16edf-cc47-44db-9a8c-ac7e3dd30673" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getMarkaByID" doc:id="56c60c3a-d910-4627-97ae-7f371be913bf" >
+		<db:select doc:name="Select" doc:id="ac80c3e8-27fe-4312-bf59-162296694c25" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+marka 
+WHERE markaID = :markaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'markaID' : attributes.uriParams.markaID}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="50446d28-bfde-4551-a717-6ab1af6b02d6" message="#['Marka nije pronadjena']">
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:INVALID_ID" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Transform Message" doc:id="753e939f-538b-488d-a65d-1ca0068ac48a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllServis" doc:id="1089cf22-fb8f-46ef-b320-566d660b5360" >
+		<db:select doc:name="Select_All_Servis" doc:id="faf2c7b8-678e-4998-8d6b-ae7e6f4cc23f" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+servis_automobila</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="591db84f-ab42-4b97-acf3-37580bef1120" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getServisByID" doc:id="31d82ea6-cdfe-4086-977d-188594c2fa55" >
+		<db:select doc:name="Select_ServisByID" doc:id="76f3287d-9d67-450d-8a44-c745c90c9010" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+servis_automobila
+WHERE servisID = :servisID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'servisID' : attributes.uriParams.servisID}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="0312be80-48a5-4cd1-b097-4d4126e46d73" message="#['Servis nije pronadjen']">
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:INVALID_ID" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Transform Message" doc:id="87663a21-ddc6-4126-b1ec-a2480c69bdfa" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllTipAutomobila" doc:id="4ebad6ee-087b-4533-b5db-5a4e8fb911ef" >
+		<db:select doc:name="Select_All_Tipovi_Automobila" doc:id="874a414b-9eaa-4ccb-b54a-9f5e4a3f0c17" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+tip_automobila</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="189c7b5b-def7-481d-b412-53908c944d12" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getTipoviAutomobilaByID" doc:id="9fb42698-7661-446a-8acf-7407f48bcaf9" >
+		<db:select doc:name="Select_TipoviAutomobilaByID" doc:id="6918479a-a51c-4179-99f9-f665ec6d10e5" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+tip_automobila
+WHERE tipAutomobilaID = :tipAutomobilaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'tipAutomobilaID' : attributes.uriParams.tipAutomobilaID}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="f60f9af0-b395-4d0b-b33a-6f7089afb78d" message="#['Tip automobila nije pronadjen']">
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:INVALID_ID" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Transform Message" doc:id="fbaf32d0-b0a6-413e-b5dd-70adc70cb188" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllDodatniZahtev" doc:id="8b105855-b3d0-4a03-9d44-d76da4508fdf" >
+		<db:select doc:name="Select_All_Dodadtni_Zahtev" doc:id="d36b06a2-de11-4a0e-a846-99239ce68658" config-ref="Database_Config">
+			<db:sql >SELECT * FROM 
+dodatnizahtev</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="5e516aa5-dac6-4406-ae8d-69112c39bd33" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getDodatniZahtevByID" doc:id="57e9976f-5869-4cde-bac7-f22e97084399" >
+		<db:select doc:name="Select_DodatniZahtevByID" doc:id="58af3b20-7bdb-4afd-82a3-7868d601c484" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+dodatnizahtev
+WHERE dodatniZahtevID = :dodatniZahtevID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'dodatniZahtevID' : attributes.uriParams.dodatniZahtevID}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="e4ff9dda-ef70-407f-ad4e-dd765ac67981" message="#['Dodatni zahtev nije pronadjen']">
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:INVALID_ID" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Transform Message" doc:id="c8df38b0-642b-4735-8081-3663530e7764" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/jSON
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllKorisnik" doc:id="2187f157-a6e5-4848-a6e8-28e4cd412397" >
+		<db:select doc:name="Select_AllKorisnik" doc:id="93ae95e4-cffb-4d8a-8cfc-2f208b7ffaf5" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+korisnik</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="197e5043-e9a5-4eb6-b4ba-e71960f15a5d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+ payload
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getKorisniciByID" doc:id="82794b6a-8769-4554-bd37-e8f69fbf53ca" >
+		<db:select doc:name="Select_KorisniciByID" doc:id="ee158898-9e23-4046-8e77-beb790594968" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+korisnik 
+WHERE korisnikID = :korisnikID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'korisnikID' : attributes.uriParams.korisnikID}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="65d172e8-ec29-4dae-a84b-30d4614f7e34" message="#['Korisnik nije pronadjen']">
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:INVALID_ID" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Transform Message" doc:id="baa1623b-fc51-4802-b185-a497ec04e890" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllKupoprodajniUgovor" doc:id="b5725322-98fa-4358-9da5-cc8035a12013" >
+		<db:select doc:name="Select_All_KupoprodajniUgovor" doc:id="6a5dbb8f-1d43-44bb-abbe-833f1580d531" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+kupoprodajni_ugovor</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="a6891951-fd28-46fa-a17e-b1a1d9dd1d1b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getKupoprodajniUgovorByID" doc:id="82e71702-f28f-4969-8074-e43af9809ceb" >
+		<db:select doc:name="Select_KupoprodajniUgovorByID" doc:id="96424ace-9c48-4a35-854b-5d12b6a1917c" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+kupoprodajni_ugovor
+WHERE kupoprodajniUgovorID = :kupoprodajniUgovorID
+
+</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kupoprodajniUgovorID' : attributes.uriParams.kupoprodajniUgovorID}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="405483c4-9c74-42d3-8b9d-621716e3148d" message="#['Kupoprodajni ugovor nije pronadjen']">
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:INVALID_ID" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Transform Message" doc:id="20733fcd-f951-4dff-b56d-fa7b638afb88" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllOsiguravajucaKuca" doc:id="5d4941cc-b471-473b-ae4c-6837025d58fe" >
+		<db:select doc:name="Select_AllOsiguravajucaKuca" doc:id="5767756e-01c2-4e86-83a3-d24092c23148" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+osiguravajuca_kuca</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="2032ab2d-b5f6-4842-b565-4b0be0445a79" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getOsiguravajucaKucaByID" doc:id="d65f533c-e7ad-47b3-899f-a37b74562161" >
+		<db:select doc:name="Select_OsiguravajucaKucaByID" doc:id="bf198a23-2cee-41f4-a34d-1d6d49ef3ea8" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+osiguravajuca_kuca
+WHERE osiguravajucaKucaID = :osiguravajucaKucaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'osiguravajucaKucaID' : attributes.uriParams.osiguravajucaKucaID}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="72f28079-c5fd-4af2-b21e-e144d6467408" message="#['Osiguravajuca kuca nije pronadjena']">
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:INVALID_ID" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Transform Message" doc:id="ff25e8a3-acff-4c7e-92c1-9ace9ff19c0d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllPoliseOsiguranja" doc:id="2804253c-ba7c-4a90-8aa3-11e6d032c70c" >
+		<db:select doc:name="Select_AllPoliseOsiguranja" doc:id="663563fb-320e-4766-9c08-a72797f8ef7b" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+polise_osiguranja</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="31fe40fd-6d80-4a82-8c54-624c01f926df" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getPoliseOsiguranjaByID" doc:id="206eb63a-842a-4ce5-be4d-1c993481d863" >
+		<db:select doc:name="Select_PoliseByID" doc:id="954a0b1f-a3e3-44d4-9f13-39560f7cce72" config-ref="Database_Config">
+			<db:sql >SELECT * FROM 
+polise_osiguranja
+WHERE poliseOsiguranjaID = :poliseOsiguranjaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'poliseOsiguranjaID' : attributes.uriParams.poliseOsiguranjaID}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="1fd45006-ae07-48d8-bbd2-850e4bba99f9" message="#['Polise  nisu  pronadjene']">
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:INVALID_ID" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Transform Message" doc:id="5a89cc82-b471-4ccb-a1ca-68ebb0bd36f7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllPoliseiUgovor" doc:id="bebe066a-c0d6-49b7-a4db-1417c63caeb9" >
+		<db:select doc:name="Select_AllPoliseIUgovor" doc:id="57a31549-969b-4f45-b11f-a7f10c2cf3af" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+polise_osiguranja_kupoprodajni_ugovor</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="c2e31257-a74d-433b-a2ee-7597cc23939b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getPoliseiUgovoriByID" doc:id="ae6d2d59-45f5-41aa-bc66-35bd2f37634d" >
+		<db:select doc:name="Select" doc:id="014207b2-cea8-440e-bcba-a81565e8f7f0" config-ref="Database_Config">
+			<db:sql >SELECT * FROM
+polise_osiguranja_kupoprodajni_ugovor
+WHERE kupoprodajniUgovorID = :kupoprodajniUgovorID
+AND poliseOsiguranjaID = :poliseOsiguranjaID</db:sql>
+			<db:input-parameters ><![CDATA[#[{'kupoprodajniUgovorID' : attributes.uriParams.kupoprodajniUgovorID,
+'poliseOsiguranjaID' : attributes.uriParams.poliseOsiguranjaID }]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="03fc3d43-e9ab-4619-b4b0-7bc8e49d1588" message="#['Polise i ugovori nisu pronadjeni']">
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:INVALID_ID" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Transform Message" doc:id="184127fd-c13b-42d1-988c-db71ea350311" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

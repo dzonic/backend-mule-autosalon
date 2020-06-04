@@ -1,0 +1,24 @@
+[
+{
+"kupacID": 1,
+"ime": "Jovan",
+"prezime": "Jovanić",
+"JMBG": 2322456765678,
+"adresa": "Sarajevska 23",
+"kontakt": "067-22-22-3",
+"korisnikID": 4,
+"popustNaKupovinu": 0
+
+},
+{
+"kupacID": 2,
+"ime": "Stanislava",
+"prezime": "Marković",
+"JMBG": 9987876765672,
+"adresa": "Nemanjina 23",
+"kontakt": "065-33-44-55",
+"korisnikID": 5,
+"popustNaKupovinu": 1999
+
+}
+]

@@ -1,0 +1,865 @@
+#%RAML 1.0
+title: AutoSalonAPI
+version: 1.0
+
+types:
+  Automobil: !include datatypes/AutomobilDataType.raml
+  DodatniZahtev: !include datatypes/DodatniZahtevDataType.raml
+  Korisnik: !include datatypes/KorisnikDataType.raml
+  Kupac: !include datatypes/KupacDataType.raml
+  KupoprodajniUgovor: !include datatypes/KupoprodajniUgovorDataType.raml
+  Marka: !include datatypes/MarkaDataType.raml
+  Model: !include datatypes/ModelDataType.raml
+  OsiguravajucaKuca: !include datatypes/OsiguravajucaKucaDataType.raml
+  PoliseOsiguranja: !include datatypes/PoliseOsiguranjaDataType.raml
+  PoliseOsiguranjaKupoprodajniUgovor: !include datatypes/PoliseOsiguranjaKupoprodajniUgovorDataType.raml
+  Prodavac: !include datatypes/ProdavacDataType.raml
+  ServisAutomobila: !include datatypes/ServisAutomobilaDataType.raml
+  TipAutomobila: !include datatypes/TipAutomobilaDataType.raml
+  
+/login:
+  get:
+    description: Metoda koja vraca da li je korisnik registrovan
+    headers:
+      KlijentID:
+        description: Korisnicko ime
+        required: true
+        type: string
+      KlijentLozinka:
+        description: Korisnikova lozinka
+        required: true
+        type: string
+    responses:
+        200:
+          description: Korisnik se uspesno ulogovao
+          body:
+            application/json:
+              examples:
+                output: !include examples/KorisnikExample.raml
+        400:
+          description: Greska prilikom preuzimanja podataka iz baze
+          body:
+            application/json:
+              example:
+                message: Greska podaci iz baze nisu preuzeti
+        401:
+          description: Ne postoji korisnik da unetim korisnickim imenom i lozinkom
+          body:
+            application/json:
+              example:
+                message: Netacni podaci 
+                
+/automobil:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: Automobil[]
+            example:
+              !include examples/AutomobilExamples.raml
+      404:
+        body:
+          application/json:
+            example:
+              "Automobil nije pronadjen"
+  
+  post:
+    body:
+      application/json:
+        type: Automobil
+        examples:
+          input: !include examples/AutomobilNoIDExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Automobil je dodat !
+  
+
+  /{automobilID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output: !include examples/AutomobilExample.raml
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Automobil je obrisan!
+        404:
+          body:
+            application/json:
+              example:
+                "Automobil nije pronadjen"
+      
+    put:
+      body:
+        application/json:
+          type: Automobil
+          examples:
+            input: !include examples/AutomobilNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Automobil je azuriran!
+
+/dodatniZahtev:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: DodatniZahtev[]
+            example:
+              !include examples/DodatniZahtevExamples.raml
+      404:
+        body:
+          application/json:
+            example:
+              "Dodatni zahtev nije pronadjen"
+              
+  post:
+    body:
+      application/json:
+        type: DodatniZahtev
+        examples:
+          input: !include examples/DodatniZahtevNoIDExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Dodatni zahtev je dodat !
+
+  /{dodatniZahtevID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output: !include examples/DodatniZahtevExample.raml
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Dodatni zahtev je obrisan!
+        404:
+          body:
+            application/json:
+              example:
+                "Dodatni zahtev nije pronadjen"
+      
+    put:
+      body:
+        application/json:
+          type: DodatniZahtev
+          examples:
+            input: !include examples/DodatniZahtevNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Dodatni zahtev je azuriran!
+
+/korisnik:
+  get:
+    queryParameters:
+      username:
+        displayName: Korisnicko ime
+        required: false
+    responses:
+      200:
+        body:
+          application/json:
+            type: Korisnik[]
+            example:
+              !include examples/KorisnikExamples.raml
+      404:
+        body:
+          application/json:
+            example:
+              "Korisnik nije pronadjen"
+              
+  post:
+    body:
+      application/json:
+        type: Korisnik
+        examples:
+          input: !include examples/KorisnikNoIDExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Korisnik je dodat !
+
+  /{korisnikID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output: !include examples/KorisnikExample.raml
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Korisnik je obrisan!
+        404:
+          body:
+            application/json:
+              example:
+                "Korisnik nije pronadjen"
+      
+    put:
+      body:
+        application/json:
+          type: Korisnik
+          examples:
+            input: !include examples/KorisnikNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Korisnik je azuriran!
+
+/kupac:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: Kupac[]
+            example:
+              !include examples/KupacExamples.raml
+      404:
+        body:
+          application/json:
+            example:
+              "Kupac nije pronadjen"
+              
+  post:
+    body:
+      application/json:
+        type: Kupac
+        examples:
+          input: !include examples/KupacNoIDExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Kupac je dodat !
+
+  /{kupacID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output: !include examples/KupacExample.raml
+                
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Kupac je obrisan!
+        404:
+          body:
+            application/json:
+              example:
+                "Kupac nije pronadjen"
+      
+    put:
+      body:
+        application/json:
+          type: Kupac
+          examples:
+            input: !include examples/KupacNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Kupac je azuriran!
+
+/kupoprodajniUgovor:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: KupoprodajniUgovor[]
+            example:
+              !include examples/KupoprodajniUgovorExamples.raml
+      404:
+        body:
+          application/json:
+            example:
+              "Kupoprodajni ugovor nije pronadjen"
+              
+  post:
+    body:
+      application/json:
+        type: KupoprodajniUgovor
+        examples:
+          input: !include examples/KupoprodajniUgovorNoIDExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Kupoprodajni ugovor je dodat !
+
+  /{kupoprodajniUgovorID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output: !include examples/KupoprodajniUgovorExample.raml
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Kupoprodajni ugovor je obrisan!
+        404:
+          body:
+            application/json:
+              example:
+                "Kupoprodajni ugovor nije pronadjen"
+      
+    put:
+      body:
+        application/json:
+          type: KupoprodajniUgovor
+          examples:
+            input: !include examples/KupoprodajniUgovorNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Kupoprodajni ugovor je azuriran!
+
+/marka:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: Marka[]
+            example:
+              !include examples/MarkaExamples.raml
+      404:
+        body:
+          application/json:
+            example:
+              "Marka nije pronadjena"
+              
+  post:
+    body:
+      application/json:
+        type: Marka
+        examples:
+          input: !include examples/MarkaNoIDExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Marka je dodata !
+
+  /{markaID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output: !include examples/MarkaExample.raml
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Marka je obrisana!
+        404:
+          body:
+            application/json:
+              example:
+                "Marka nije pronadjena"
+      
+    put:
+      body:
+        application/json:
+          type: Marka
+          examples:
+            input: !include examples/MarkaNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Marka je azurirana!
+
+/model:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: Model[]
+            example:
+              !include examples/ModelExamples.raml
+      404:
+        body:
+          application/json:
+            example: 
+              "Model nije pronadjen"
+              
+  post:
+    body:
+      application/json:
+        type: Model
+        examples:
+          input: !include examples/ModelNoIDExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Model je dodat !
+
+  /{modelID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output: !include examples/ModelExample.raml
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Model je obrisan!
+        404:
+          body:
+            application/json:
+              example:
+                "Model nije pronadjen"
+      
+    put:
+      body:
+        application/json:
+          type: Model
+          examples:
+            input: !include examples/ModelNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Model je azuriran!
+
+/osiguravajucaKuca:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: OsiguravajucaKuca[]
+            example:
+              !include examples/OsiguravajucaKucaExamples.raml
+      404:
+        body:
+          application/json:
+            example: 
+              "Osiguravajuca kuca nije pronadjena"
+              
+  post:
+    body:
+      application/json:
+        type: OsiguravajucaKuca
+        examples:
+          input: !include examples/OsiguravajucaKucaNoIDExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Osiguravajuca kuca je dodata !
+
+  /{osiguravajucaKucaID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output: !include examples/OsiguravajucaKucaExample.raml
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Osiguravajuca kuca je obrisana!
+        404:
+          body:
+            application/json:
+              example:
+                "Osiguravajuca kuca nije pronadjena"
+      
+    put:
+      body:
+        application/json:
+          type: OsiguravajucaKuca
+          examples:
+            input: !include examples/OsiguravajucaKucaNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Osiguravajuca kuca je azurirana!
+
+/poliseOsiguranja:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: PoliseOsiguranja[]
+            example:
+              !include examples/PoliseOsiguranjaExamples.raml
+      404:
+        body:
+          application/json:
+            example: 
+              "Polise osiguranja nisu pronadjene"
+              
+  post:
+    body:
+      application/json:
+        type: PoliseOsiguranja
+        examples:
+          input: !include examples/PoliseOsiguranjaExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Polisa osiguranja je dodata !
+
+  /{poliseOsiguranjaID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output: !include examples/PoliseOsiguranjaExample.raml
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Polia osiguranja je obrisana!
+        404:
+          body:
+            application/json:
+              example:
+                "Polisa osiguranja nije pronadjena"
+      
+    put:
+      body:
+        application/json:
+          type: PoliseOsiguranja
+          examples:
+            input: !include examples/PoliseOsiguranjaNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Polisa osiguranja je azurirana!
+
+/poliseOsiguranjaKupoprodajniUgovor:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: PoliseOsiguranjaKupoprodajniUgovor[]
+            example:
+              !include examples/PoliseOsiguranjaKupoprodajniUgovorExamples.raml
+      404:
+        body:
+          application/json:
+            example: 
+              "Polise osiguranja i kupoprodajnog ugovora nisu pronadjene"
+              
+  post:
+    body:
+      application/json:
+        type: PoliseOsiguranjaKupoprodajniUgovor
+        examples:
+          input: !include examples/PoliseOsiguranjaKupoprodajniUgovorNoIDExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Polisa osiguranja i kupoprodajnog ugovora je dodata !
+
+  /{poliseOsiguranjaID}/{kupoprodajniUgovorID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output: !include examples/PoliseOsiguranjaKupoprodajniUgovorExample.raml
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Polia osiguranja i kupoprodajnog ugovora je obrisana!
+        404:
+          body:
+            application/json:
+              example:
+                "Polisa osiguranja i kupoprodajnog ugovora nije pronadjena"
+      
+    put:
+      body:
+        application/json:
+          type: PoliseOsiguranjaKupoprodajniUgovor
+          examples:
+            input: !include examples/PoliseOsiguranjaKupoprodajniUgovorNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Polisa osiguranja i kupoprodajnog ugovora je azurirana!
+
+/prodavac:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: Prodavac[]
+            example:
+              !include examples/ProdavacExamples.raml
+      404:
+        body:
+          application/json:
+            example:
+              "Prodavac nije pronadjen"
+              
+  post:
+    body:
+      application/json:
+        type: Prodavac
+        examples:
+          input: !include examples/ProdavacNoIDExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Prodavac je dodat !
+
+  /{prodavacID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output: !include examples/ProdavacExample.raml
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Prodavac je obrisan!
+        404:
+          body:
+            application/json:
+              example:
+                "Prodavac nije pronadjen"
+      
+    put:
+      body:
+        application/json:
+          type: Prodavac
+          examples:
+            input: !include examples/ProdavacNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Prodavac je azuriran!
+
+/servis:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: ServisAutomobila[]
+            example:
+              !include examples/ServisAutomobilaExamples.raml
+      404:
+        body:
+          application/json:
+            example:
+              "Servis nije pronadjen"
+              
+  post:
+    body:
+      application/json:
+        type: ServisAutomobila
+        examples:
+          input: !include examples/ServisAutomobilaNoIDExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Servis je dodat !
+
+  /{servisID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output: !include examples/ServisAutomobilaExample.raml
+                
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Servis  je obrisan!
+        404:
+          body:
+            application/json:
+              example:
+                "Servis nije pronadjen"
+      
+    put:
+      body:
+        application/json:
+          type: ServisAutomobila
+          examples:
+            input: !include examples/ServisAutomobilaNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Servis je azuriran!
+
+/tipAutomobila:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: TipAutomobila[]
+            example:
+              !include examples/TipAutomobilaExamples.raml
+      404:
+        body:
+          application/json:
+            example:
+              "Tip automobila nije pronadjen"
+              
+  post:
+    body:
+      application/json:
+        type: TipAutomobila
+        examples:
+          input: !include examples/TipAutomobilaNoIDExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Tip automobila je dodat !
+
+  /{tipAutomobilaID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                output: !include examples/TipAutomobilaExample.raml
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Tip automobila je obrisan!
+        404:
+          body:
+            application/json:
+              example:
+                "Tip automobila nije pronadjen"
+      
+    put:
+      body:
+        application/json:
+          type: TipAutomobila
+          examples:
+            input: !include examples/TipAutomobilaNoIDExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Tip automobila je azuriran!
+
+

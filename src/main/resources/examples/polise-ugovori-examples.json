@@ -1,0 +1,12 @@
+[
+	{
+		"poliseOsiguranjaID": 1,
+		"kupoprodajniUgovorID": 3,
+		"brojPoliseUgovora": "111-PO"
+	},
+	{
+		"poliseOsiguranjaID": 2,
+		"kupoprodajniUgovorID": 5,
+		"brojPoliseUgovora": "112-RA"
+	}
+]

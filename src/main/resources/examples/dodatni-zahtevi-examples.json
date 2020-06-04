@@ -1,0 +1,14 @@
+[
+	{
+		"dodatniZahtevID": 1,
+		"opisZahteva": "Paket opreme za gume",
+		"datumPodnosenja": "2017-06-23T00:00:00.000Z",
+		"kupoprodajniUgovorID": 1
+	},
+	{
+		"dodatniZahtevID": 2,
+		"opisZahteva": "Zatamnjenje stakala",
+		"datumPodnosenja": "2018-05-17T00:00:00.000Z",
+		"kupoprodajniUgovorID": 2
+	}
+]

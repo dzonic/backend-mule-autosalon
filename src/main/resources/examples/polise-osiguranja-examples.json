@@ -1,0 +1,14 @@
+[
+	{
+		"poliseOsiguranjaID": 1,
+		"vaziOd": "2017-04-23T00:00:00.000Z",
+		"vaziDo": "2020-07-23T00:00:00.000Z",
+		"osiguravajucaKucaID": 1
+	},
+	{
+		"poliseOsiguranjaID": 2,
+		"vaziOd": "2015-09-12T00:00:00.000Z",
+		"vaziDo": "2024-05-16T00:00:00.000Z",
+		"osiguravajucaKucaID": 6
+	}
+]

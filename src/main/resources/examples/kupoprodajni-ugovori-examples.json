@@ -1,0 +1,20 @@
+[
+	{
+		"kupoprodajniUgovorID": 1,
+		"datumSklapanja": "2017-06-23T00:00:00.000Z",
+		"nacinPlacanja": "Kartica",
+		"cena": 23400,
+		"automobilID": 1,
+		"kupacID": 1,
+		"prodavacID": 1
+	},
+	{
+		"kupoprodajniUgovorID": 2,
+		"datumSklapanja": "2018-05-17T00:00:00.000Z",
+		"nacinPlacanja": "KKeš",
+		"cena": 19990,
+		"automobilID": 2,
+		"kupacID": 2,
+		"prodavacID": 3
+	}
+]

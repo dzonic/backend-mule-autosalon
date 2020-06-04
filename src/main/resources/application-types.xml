@@ -1,0 +1,222 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="automobili" format="json">
+      <types:shape format="weave" example="examples/automobili-examples.json"><![CDATA[%dw 2.0
+
+type automobili = Array<{|  automobilID: Number {"typeId": "int"},   kubikaza: Number {"typeId": "int"},   brojSasije: String,   konjskaSnaga: Number {"typeId": "int"},   bojaAutomobila: String,   godinaProizvodnje: Number {"typeId": "int"},   markaID: Number {"typeId": "int"},   tipAutomobilaID: Number {"typeId": "int"},   servisID: Number {"typeId": "int"}|}> {"example": "[{\\\"automobilID\\\":1,\\\"kubikaza\\\":1330,\\\"brojSasije\\\":\\\"XMD-33-DR\\\",\\\"konjskaSnaga\\\":177,\\\"bojaAutomobila\\\":\\\"Bela\\\",\\\"godinaProizvodnje\\\":2014,\\\"markaID\\\":1,\\\"tipAutomobilaID\\\":3,\\\"servisID\\\":7},{\\\"automobilID\\\":2,\\\"kubikaza\\\":1990,\\\"brojSasije\\\":\\\"XZY-45-RR\\\",\\\"konjskaSnaga\\\":200,\\\"bojaAutomobila\\\":\\\"Crna\\\",\\\"godinaProizvodnje\\\":2019,\\\"markaID\\\":3,\\\"tipAutomobilaID\\\":4,\\\"servisID\\\":2}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="kupci" format="json">
+      <types:shape format="weave" example="examples/kupci-examples.json"><![CDATA[%dw 2.0
+
+type kupci = Array<{|  kupacID: Number {"typeId": "int"},   ime: String,   prezime: String,   JMBG: Number {"typeId": "double"},   adresa: String,   kontakt: String,   korisnikID: Number {"typeId": "int"},   popustNaKupovinu: Number {"typeId": "int"}|}> {"example": "[{\\\"kupacID\\\":1,\\\"ime\\\":\\\"Jovan\\\",\\\"prezime\\\":\\\"Jovani\u0107\\\",\\\"JMBG\\\":2322456765678,\\\"adresa\\\":\\\"Sarajevska 23\\\",\\\"kontakt\\\":\\\"067-22-22-3\\\",\\\"korisnikID\\\":4,\\\"popustNaKupovinu\\\":0},{\\\"kupacID\\\":2,\\\"ime\\\":\\\"Stanislava\\\",\\\"prezime\\\":\\\"Markovi\u0107\\\",\\\"JMBG\\\":9987876765672,\\\"adresa\\\":\\\"Nemanjina 23\\\",\\\"kontakt\\\":\\\"065-33-44-55\\\",\\\"korisnikID\\\":5,\\\"popustNaKupovinu\\\":1999}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="prodavci" format="json">
+      <types:shape format="weave" example="examples/prodavci-examples.json"><![CDATA[%dw 2.0
+
+type prodavci = Array<{|  prodavacID: Number {"typeId": "int"},   ime: String,   prezime: String,   JMBG: Number {"typeId": "double"},   adresa: String,   kontakt: String,   datumZaposlenja: String,   korisnikID: Number {"typeId": "int"}|}> {"example": "[{\\\"prodavacID\\\":1,\\\"ime\\\":\\\"Miomir\\\",\\\"prezime\\\":\\\"Miri\u0107\\\",\\\"JMBG\\\":1123450439343,\\\"adresa\\\":\\\"Majska 44\\\",\\\"kontakt\\\":\\\"067-44-44-123\\\",\\\"datumZaposlenja\\\":\\\"2001-02-02T00:00:00.000Z\\\",\\\"korisnikID\\\":1},{\\\"prodavacID\\\":2,\\\"ime\\\":\\\"Milica\\\",\\\"prezime\\\":\\\"Jovanovi\u0107\\\",\\\"JMBG\\\":3423454345674,\\\"adresa\\\":\\\"Vojvode Stepe 134\\\",\\\"kontakt\\\":\\\"066-33-33-234\\\",\\\"datumZaposlenja\\\":\\\"2006-08-08T00:00:00.000Z\\\",\\\"korisnikID\\\":2}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="modeli" format="json">
+      <types:shape format="weave" example="examples/modeli-examples.json"><![CDATA[%dw 2.0
+
+type modeli = Array<{|  modelID: Number {"typeId": "int"},   nazivModela: String|}> {"example": "[{\\\"modelID\\\":1,\\\"nazivModela\\\":\\\"M3\\\"},{\\\"modelID\\\":2,\\\"nazivModela\\\":\\\"M5\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="marke" format="json">
+      <types:shape format="weave" example="examples/marke-examples.json"><![CDATA[%dw 2.0
+
+type marke = Array<{|  markaID: Number {"typeId": "int"},   nazivMarke: String,   modelID: Number {"typeId": "int"}|}> {"example": "[{\\\"markaID\\\":1,\\\"nazivMarke\\\":\\\"BMW\\\",\\\"modelID\\\":1},{\\\"markaID\\\":2,\\\"nazivMarke\\\":\\\"BMW\\\",\\\"modelID\\\":3}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="servisi" format="json">
+      <types:shape format="weave" example="examples/servisi-examples.json"><![CDATA[%dw 2.0
+
+type servisi = Array<{|  servisID: Number {"typeId": "int"},   datumServisiranja: String,   opis: String,   cenaServisa: Number {"typeId": "int"},   aktuelan: Boolean|}> {"example": "[{\\\"servisID\\\":1,\\\"datumServisiranja\\\":\\\"2019-03-12T00:00:00.000Z\\\",\\\"opis\\\":\\\"Postavljanje i zamena sezonskih guma\\\",\\\"cenaServisa\\\":5000,\\\"aktuelan\\\":false},{\\\"servisID\\\":2,\\\"datumServisiranja\\\":\\\"2020-01-23T00:00:00.000Z\\\",\\\"opis\\\":\\\"Testiranje rada kontrolne table\\\",\\\"cenaServisa\\\":6500,\\\"aktuelan\\\":false}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="tipovi-automobila" format="json">
+      <types:shape format="weave" example="examples/tipovi-automobila-examples.json"><![CDATA[%dw 2.0
+
+type tipovi_automobila = Array<{|  tipAutomobilaID: Number {"typeId": "int"},   nazivTipaAutomobla: String|}> {"example": "[{\\\"tipAutomobilaID\\\":1,\\\"nazivTipaAutomobla\\\":\\\"limuzinav\\\"},{\\\"tipAutomobilaID\\\":4,\\\"nazivTipaAutomobla\\\":\\\"kupe\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="dodatni-zahtevi" format="json">
+      <types:shape format="weave" example="examples/dodatni-zahtevi-examples.json"><![CDATA[%dw 2.0
+
+type dodatni_zahtevi = Array<{|  dodatniZahtevID: Number {"typeId": "int"},   opisZahteva: String,   datumPodnosenja: String,   kupoprodajniUgovorID: Number {"typeId": "int"}|}> {"example": "[{\\\"dodatniZahtevID\\\":1,\\\"opisZahteva\\\":\\\"Paket opreme za gume\\\",\\\"datumPodnosenja\\\":\\\"2017-06-23T00:00:00.000Z\\\",\\\"kupoprodajniUgovorID\\\":1},{\\\"dodatniZahtevID\\\":2,\\\"opisZahteva\\\":\\\"Zatamnjenje stakala\\\",\\\"datumPodnosenja\\\":\\\"2018-05-17T00:00:00.000Z\\\",\\\"kupoprodajniUgovorID\\\":2}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="korisnici" format="json">
+      <types:shape format="weave" example="examples/korisnici-examples.json"><![CDATA[%dw 2.0
+
+type korisnici = Array<{|  korisnikID: Number {"typeId": "int"},   email: String,   password: String,   uloga: String|}> {"example": "[{\\\"korisnikID\\\":1,\\\"email\\\":\\\"miomir@mail.com\\\",\\\"password\\\":\\\"miomir123\\\",\\\"uloga\\\":\\\"prodavac\\\"},{\\\"korisnikID\\\":2,\\\"email\\\":\\\"milica@mail.com\\\",\\\"password\\\":\\\"milica123\\\",\\\"uloga\\\":\\\"prodavac\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="kupoprodajni-ugovori" format="json">
+      <types:shape format="weave" example="examples/kupoprodajni-ugovori-examples.json"><![CDATA[%dw 2.0
+
+type kupoprodajni_ugovori = Array<{|  kupoprodajniUgovorID: Number {"typeId": "int"},   datumSklapanja: String,   nacinPlacanja: String,   cena: Number {"typeId": "int"},   automobilID: Number {"typeId": "int"},   kupacID: Number {"typeId": "int"},   prodavacID: Number {"typeId": "int"}|}> {"example": "[{\\\"kupoprodajniUgovorID\\\":1,\\\"datumSklapanja\\\":\\\"2017-06-23T00:00:00.000Z\\\",\\\"nacinPlacanja\\\":\\\"Kartica\\\",\\\"cena\\\":23400,\\\"automobilID\\\":1,\\\"kupacID\\\":1,\\\"prodavacID\\\":1},{\\\"kupoprodajniUgovorID\\\":2,\\\"datumSklapanja\\\":\\\"2018-05-17T00:00:00.000Z\\\",\\\"nacinPlacanja\\\":\\\"KKe\u0161\\\",\\\"cena\\\":19990,\\\"automobilID\\\":2,\\\"kupacID\\\":2,\\\"prodavacID\\\":3}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="osiguravajuce-kuce" format="json">
+      <types:shape format="weave" example="examples/osiguravajuce-kuce-examples.json"><![CDATA[%dw 2.0
+
+type osiguravajuce_kuce = Array<{|  osiguravajucaKucaID: Number {"typeId": "int"},   nazivOsiguravajuceKuce: String|}> {"example": "[{\\\"osiguravajucaKucaID\\\":1,\\\"nazivOsiguravajuceKuce\\\":\\\"AS Osiguranje\\\"},{\\\"osiguravajucaKucaID\\\":2,\\\"nazivOsiguravajuceKuce\\\":\\\"AMS Osiguranje\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="polise-osiguranja" format="json">
+      <types:shape format="weave" example="examples/polise-osiguranja-examples.json"><![CDATA[%dw 2.0
+
+type polise_osiguranja = Array<{|  poliseOsiguranjaID: Number {"typeId": "int"},   vaziOd: String,   vaziDo: String,   osiguravajucaKucaID: Number {"typeId": "int"}|}> {"example": "[{\\\"poliseOsiguranjaID\\\":1,\\\"vaziOd\\\":\\\"2017-04-23T00:00:00.000Z\\\",\\\"vaziDo\\\":\\\"2020-07-23T00:00:00.000Z\\\",\\\"osiguravajucaKucaID\\\":1},{\\\"poliseOsiguranjaID\\\":2,\\\"vaziOd\\\":\\\"2015-09-12T00:00:00.000Z\\\",\\\"vaziDo\\\":\\\"2024-05-16T00:00:00.000Z\\\",\\\"osiguravajucaKucaID\\\":6}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="polise-ugovori" format="json">
+      <types:shape format="weave" example="examples/polise-ugovori-examples.json"><![CDATA[%dw 2.0
+
+type polise_ugovori = Array<{|  poliseOsiguranjaID: Number {"typeId": "int"},   kupoprodajniUgovorID: Number {"typeId": "int"},   brojPoliseUgovora: String|}> {"example": "[{\\\"poliseOsiguranjaID\\\":1,\\\"kupoprodajniUgovorID\\\":3,\\\"brojPoliseUgovora\\\":\\\"111-PO\\\"},{\\\"poliseOsiguranjaID\\\":2,\\\"kupoprodajniUgovorID\\\":5,\\\"brojPoliseUgovora\\\":\\\"112-RA\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#802d8917-0cde-4353-9086-439564fcf116">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="automobili"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#9a15c94e-c96a-4eb8-9513-ca8b3acea6c8">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="kupci"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#78f11e83-bb42-423b-be54-373fe1a5140b">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="prodavci"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#170f60b7-1244-4417-8d01-dc04b50b5dd9">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="prodavci"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#fde5828e-6ec7-4228-b323-da5166f9ce0f">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="modeli"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#cae16edf-cc47-44db-9a8c-ac7e3dd30673">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="marke"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#591db84f-ab42-4b97-acf3-37580bef1120">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="servisi"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#189c7b5b-def7-481d-b412-53908c944d12">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="tipovi-automobila"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#5e516aa5-dac6-4406-ae8d-69112c39bd33">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="dodatni-zahtevi"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#197e5043-e9a5-4eb6-b4ba-e71960f15a5d">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="korisnici"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#a6891951-fd28-46fa-a17e-b1a1d9dd1d1b">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="kupoprodajni-ugovori"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#2032ab2d-b5f6-4842-b565-4b0be0445a79">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="osiguravajuce-kuce"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#31fe40fd-6d80-4a82-8c54-624c01f926df">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="polise-osiguranja"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#c2e31257-a74d-433b-a2ee-7597cc23939b">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="polise-ugovori"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
