@@ -314,7 +314,6 @@ AND poliseOsiguranjaID = :poliseOsiguranjaID
 			<otherwise >
 				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="3de43971-d5db-41c2-a255-9272895a7b9d" />
 				<flow-ref doc:name="Flow Reference" doc:id="ec1acbbe-b9e9-45e9-b027-6e4dce8d373b" name="updatePoliseIUgovori"/>
-				<file:write doc:name="Write" doc:id="4cf50bf2-fe49-4b13-95c2-8512f39694bd" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
 			</otherwise>
 		</choice>
 	</flow>
@@ -358,7 +357,6 @@ WHERE prodavacID = :prodavacID</db:sql>
 			<otherwise >
 				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="3d979c96-9aa3-4e2b-8867-2bcf8d56467f" />
 				<flow-ref doc:name="Flow Reference" doc:id="b06c44e8-445b-47b7-a25c-95a12801e2bc" name="updateProdavac"/>
-				<file:write doc:name="Write" doc:id="a8f111e0-02dd-445a-bc25-7ecebccb86b2" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
 			</otherwise>
 		</choice>
 	</flow>
@@ -398,7 +396,6 @@ WHERE poliseOsiguranjaID = :poliseOsiguranjaID</db:sql>
 			<otherwise >
 				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="a8cd062d-7b1a-4a56-896a-e41a8cb148b9" />
 				<flow-ref doc:name="Flow Reference" doc:id="50053594-2557-4e7a-8920-8536fc22ab8e" name="updatePoliseOsiguranja"/>
-				<file:write doc:name="Write" doc:id="622532ff-320b-4f5e-9dfe-d3945a7c951b" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
 			</otherwise>
 		</choice>
 	</flow>
@@ -438,7 +435,6 @@ WHERE osiguravajucaKucaID = :osiguravajucaKucaID</db:sql>
 			<otherwise >
 				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="dc575394-d908-4a13-a06d-0eb24522eb00" />
 				<flow-ref doc:name="Flow Reference" doc:id="21b410b5-593e-4dbf-a741-d2d0e35c543c" name="updateOsiguravajucaKuca"/>
-				<file:write doc:name="Write" doc:id="fa3f3b65-5b80-4732-b89c-957d8d9b9f9b" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW"/>
 			</otherwise>
 		</choice>
 	</flow>
@@ -482,7 +478,6 @@ WHERE kupoprodajniUgovorID = :kupoprodajniUgovorID
 			<otherwise >
 				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="2795043c-96cb-4aa6-bd0f-31203c786010" />
 				<flow-ref doc:name="Flow Reference" doc:id="bce67feb-c5ca-4382-8c01-3c6fdf8ead47" name="updateKupoprodajniUgovor"/>
-				<file:write doc:name="Write" doc:id="155c1ae6-8ee9-4296-89db-9dd138e156a1" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
 			</otherwise>
 		</choice>
 	</flow>
@@ -526,7 +521,6 @@ WHERE kupacID = :kupacID</db:sql>
 			<otherwise >
 				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="2f1cc9ca-da86-4dd3-b942-9e90728d3fb9" />
 				<flow-ref doc:name="Flow Reference" doc:id="b7afbe1d-c653-4fd1-8469-e58b9ff65807" name="updateKupac"/>
-				<file:write doc:name="Write" doc:id="d0f90096-21f1-4dba-a525-a13e50c997cf" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
 			</otherwise>
 		</choice>
 	</flow>
@@ -568,7 +562,6 @@ WHERE dodatniZahtevID = :dodatniZahtevID
 			<otherwise >
 				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="1b656662-2ec0-4009-bd17-ec8a041598a7" />
 				<flow-ref doc:name="Flow Reference" doc:id="ccedd3eb-7a51-4d7f-8d66-4df39623f7d5" name="updateDodatniZahtev"/>
-				<file:write doc:name="Write" doc:id="5067d926-834e-4cd8-88ca-cab00e48848a" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
 			</otherwise>
 		</choice>
 	</flow>
@@ -615,7 +608,6 @@ WHERE automobilID = :automobilID
 			<otherwise >
 				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="0a8dfd04-3ed3-46b8-9b74-bfa172edbde6" />
 				<flow-ref doc:name="Flow Reference" doc:id="0bcebb7d-b7d0-4012-a511-abbf251e5707" name="updateAutomobil"/>
-				<file:write doc:name="Write" doc:id="a9a0b40c-66c2-422b-bfa0-2b939d7b7f89" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
 			</otherwise>
 		</choice>
 	</flow>
@@ -655,7 +647,6 @@ WHERE korisnikID = :korisnikID</db:sql>
 			<otherwise >
 				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="db519f86-a782-4d56-b105-26ba4389779e" />
 				<flow-ref doc:name="Flow Reference" doc:id="22bc8d72-a901-4a48-b291-48581476099d" name="updateKorisnik"/>
-				<file:write doc:name="Write" doc:id="f28f79ea-5e02-4eed-8cf2-58cdf2b0a214" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
 			</otherwise>
 		</choice>
 	</flow>
@@ -695,7 +686,6 @@ WHERE markaID = :markaID</db:sql>
 			<otherwise >
 				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="1d4c3c37-273b-4ce1-bffb-74a94755d21c" />
 				<flow-ref doc:name="Flow Reference" doc:id="f4e3dc3b-0358-4e33-a229-630b992d2e63" name="updateMarka"/>
-				<file:write doc:name="Write" doc:id="c953f3c3-06df-4919-a93f-fe0fe17725f7" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
 			</otherwise>
 		</choice>
 	</flow>
@@ -738,7 +728,6 @@ WHERE modelID = :modelID
 			<otherwise >
 				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="7375ade3-d19e-43cd-8bff-bfdc79c540fa" />
 				<flow-ref doc:name="Flow Reference" doc:id="346ad57f-4233-4ac2-9ef0-b1119ab8cffd" name="updateModel"/>
-				<file:write doc:name="Write" doc:id="dbd12697-ffb8-4412-a81e-a96a572df376" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
 			</otherwise>
 		</choice>
 	</flow>
@@ -779,7 +768,6 @@ WHERE servisID = :servisID</db:sql>
 			<otherwise >
 				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="8fd40eb6-792d-48bd-bfeb-a3fa32be5adf" />
 				<flow-ref doc:name="Flow Reference" doc:id="c7815204-29ce-4352-9e74-6781d5abb11e" name="updateServis"/>
-				<file:write doc:name="Write" doc:id="5da5246f-b849-4978-a518-84728a6904d0" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW"/>
 			</otherwise>
 		</choice>
 	</flow>
@@ -819,7 +807,6 @@ WHERE tipAutomobilaID = :tipAutomobilaID</db:sql>
 			<otherwise >
 				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="4a63eb91-6e5b-4328-9f49-038f34f61ec4" />
 				<flow-ref doc:name="Flow Reference" doc:id="1bcd80c5-2617-47ae-9ae1-6f8e90783b2f" name="updateTipAutomobila"/>
-				<file:write doc:name="Write" doc:id="22158476-f6a4-42d7-b42b-ef8f2df6c870" config-ref="File_Config" path='#[p("file.pathW") ++  payload]' mode="CREATE_NEW" />
 			</otherwise>
 		</choice>
 	</flow>
